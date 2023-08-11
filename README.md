@@ -7,6 +7,7 @@
 * django 
 * selenium
 
+
 ---
 
 ## 러프한 일정
@@ -36,6 +37,14 @@
 
 ---
 
+### TEST postman settings
+![img.png](img.png)
+![img_1.png](img_1.png)
+
+
+---
+
+### Flow chart
 <img width="1107" alt="image" src="https://github.com/jaemanc/ktx_gacha/assets/104718153/64fb21b5-e6d7-41ea-b2fb-4309ca13d756">
 
 
