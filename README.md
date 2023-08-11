@@ -35,3 +35,8 @@
 1. 외부 API 연동 ( 카카오 채널 또는 슬랙 )
 
 ---
+
+<img width="1107" alt="image" src="https://github.com/jaemanc/ktx_gacha/assets/104718153/64fb21b5-e6d7-41ea-b2fb-4309ca13d756">
+
+
+
