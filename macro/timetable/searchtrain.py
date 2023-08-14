@@ -80,6 +80,7 @@ def get_train_list(request):
         train_btn = train_search.find_element(By.ID, "selGoTrainRa00")
         train_btn.click()
 
+
     # 조회 요청
     search_btn = train_search.find_element(By.XPATH, '//img[@src="/images/btn_inq_tick.gif"]')
     search_btn.click()
