@@ -29,7 +29,6 @@ class Login(viewsets.GenericViewSet, mixins.ListModelMixin, View):
             "password": "패스워드"
         }
         """
-
         logger.debug(f'url : v1/login')
         logger.debug(f'method: POST')
         logger.debug(f'request_data: {request.data}')
