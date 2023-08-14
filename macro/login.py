@@ -28,7 +28,7 @@ class Login(viewsets.GenericViewSet, mixins.ListModelMixin, View):
 
         except Exception as err:
             logger.debug(f'v1/login error: {traceback.format_exc()}')
-            logging.debug(f'update_user_profile_info ERROR :: {err}')
+            logger.debug(f'{err}')
             return Response(data=pages, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(data=pages, status=status.HTTP_200_OK)

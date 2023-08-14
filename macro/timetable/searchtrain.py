@@ -2,6 +2,7 @@ import logging
 import traceback
 
 from django.views import View
+from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from macro.common import get_web_site_crawling
@@ -36,8 +37,8 @@ def get_train_list(request):
     req_date = request.query_params.get("date", "1993-07-17")
 
     req_year = req_date[:4]
-    req_month = req_date[5:7]  # 5번째부터 6번째까지는 월
-    req_day = req_date[8:]  # 8번째부터 끝까지는 일
+    req_month = req_date[5:7]
+    req_day = req_date[8:]
 
     req_memberNum = request.query_params.get("memberNum", "1")
     req_trainType = request.query_params.get("trainType", "ktx")
@@ -49,7 +50,7 @@ def get_train_list(request):
     reservation_btn.click()
 
     # 승차권 예매 페이지 이동 후 driver 초기화
-    logger.info(f' 페이지 이동 : {train_search.current_url}' )
+    logger.info(f' 페이지 이동 : {train_search.current_url}')
     train_search.get(train_search.current_url)
 
     start_station = train_search.find_element(By.ID, "start")
@@ -80,9 +81,81 @@ def get_train_list(request):
         train_btn = train_search.find_element(By.ID, "selGoTrainRa00")
         train_btn.click()
 
-
     # 조회 요청
     search_btn = train_search.find_element(By.XPATH, '//img[@src="/images/btn_inq_tick.gif"]')
     search_btn.click()
+
+    train_search.implicitly_wait(3)
+
+    # 조회 결과 테이블 정보 파싱
+    # train_search.get(train_search.current_url)
+    # logger.info(f' 페이지 이동 : {train_search.current_url}' )
+    table = train_search.find_element(By.ID, "tableResult")
+
+    trs = table.find_elements(By.TAG_NAME, "tr")
+
+    row_data = []
+
+    for tr in trs:
+        count = 0
+        td_objs = tr.find_elements(By.TAG_NAME, "td")
+
+        for td in td_objs:
+            count += 1
+            if count == 3:
+                go = td.text
+                continue
+
+            if count == 4:
+                end = td.text
+                continue
+
+            try:
+                # 특실
+                if count == 5:
+                    a_tag = td.find_element(By.TAG_NAME, "a")
+                    if a_tag:
+                        img_tag = a_tag.find_element(By.TAG_NAME, "img")
+                        # btnRsv2_2 값이면 예매 가능
+                        if img_tag:
+                            btn_name = img_tag.get_attribute('name')
+                            if btn_name.__eq__("btnRsv2_0") or btn_name.__eq__("btnRsv2_1")\
+                                    or btn_name.__eq__("btnRsv2_2") or btn_name.__eq__("btnRsv2_3")\
+                                    or btn_name.__eq__("btnRsv2_4") or btn_name.__eq__("btnRsv2_5")\
+                                    or btn_name.__eq__("btnRsv2_6") or btn_name.__eq__("btnRsv2_7")\
+                                    or btn_name.__eq__("btnRsv2_8") or btn_name.__eq__("btnRsv2_9"):
+                                row_data.append({
+                                    "go": go,
+                                    "end": end,
+                                    "kind": "특실"
+                                })
+            except NoSuchElementException as err:
+                logger.info("특실 매진")
+
+            try:
+                # 일반실
+                if count == 6:
+                    a_tag = td.find_element(By.TAG_NAME, "a")
+                    if a_tag:
+                        img_tag = a_tag.find_element(By.TAG_NAME, "img")
+                        # btnRsv1_0 값이면 예매 가능
+                        if img_tag:
+                            btn_name = img_tag.get_attribute('name')
+                            if btn_name.__eq__("btnRsv1_0") or btn_name.__eq__("btnRsv1_1") \
+                                    or btn_name.__eq__("btnRsv1_2") or btn_name.__eq__("btnRsv1_3") \
+                                    or btn_name.__eq__("btnRsv1_4") or btn_name.__eq__("btnRsv1_5") \
+                                    or btn_name.__eq__("btnRsv1_6") or btn_name.__eq__("btnRsv1_7") \
+                                    or btn_name.__eq__("btnRsv1_8") or btn_name.__eq__("btnRsv1_9"):
+                                row_data.append({
+                                    "go": go,
+                                    "end": end,
+                                    "kind": "일반실"
+                                })
+
+
+            except NoSuchElementException as err:
+                logger.info("일반실 매진")
+
+    logger.info(row_data)
 
     return train_search
