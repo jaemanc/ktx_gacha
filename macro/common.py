@@ -30,6 +30,7 @@ def get_web_site_crawling(**kwargs):
         url = kwargs['url']
         # 웹사이트 URL 설정
         website_url = url  # 대상 웹사이트 URL
-        return driver.get(website_url)
+        driver.get(website_url)
+        return driver
     else:
         return Exception("400 BadRequest param url is None")

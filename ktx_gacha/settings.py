@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
+import datetime
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'kaium7%kv41*)vz)(zjy)=(jkz+4=8&yh!+^2ewf564e#o-0a6'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['django','localhost','x.x.x.x','127.0.0.1']
 
@@ -118,3 +118,32 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+LOGGING = {
+    'version': 1,
+    "formatters": {
+        "simple": {"format": "[%(name)s] %(message)s"},
+        "complex": {
+            "format": "%(asctime)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)d] [%(funcName)s()] - %(message)s"
+        },
+    },
+    "root": {"handlers": ["console", "file"], "level": "DEBUG"},
+    'handlers': {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "complex",
+            "level": "DEBUG",
+        },
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": "./ktx_gacha" + datetime.datetime.today().strftime('%Y_%m_%d') + ".log",
+            "formatter": "complex",
+            "level": "DEBUG",  # ERROR #INFO ...
+        },
+    },
+    'loggers': {
+        "parent": {"level": "DEBUG"},
+        "parent.child": {"level": "DEBUG"},
+        "chardet.charsetprober": {"level": "INFO"},
+    }
+}
