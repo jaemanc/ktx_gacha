@@ -1,8 +1,8 @@
 from django.urls import path
 
-from macro import login
+from macro.login import Login
 
 urlpatterns = [
-    path('v1/login', login.login_web_site)
+    path('v1/login', Login.as_view(({"post": "login_to_website"}))),
 ]
 
