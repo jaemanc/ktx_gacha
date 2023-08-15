@@ -60,7 +60,8 @@ https://buildabetterworld.tistory.com/75
 ---
 
 ### Flow chart
-<img width="1107" alt="image" src="https://github.com/jaemanc/ktx_gacha/assets/104718153/64fb21b5-e6d7-41ea-b2fb-4309ca13d756">
+![image](https://github.com/jaemanc/ktx_gacha/assets/104718153/e993b595-bb60-4e68-8bc1-9d2a8ff4f28d)
+
 
 
 
