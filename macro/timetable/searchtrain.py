@@ -39,7 +39,8 @@ def get_train_list(request):
 
     req_year = req_date[:4]
     req_month = req_date[5:7]
-    req_day = req_date[8:]
+    req_day = req_date[8:10]
+    req_hour = req_date[11:13] # 00~ 23 까지
 
     req_memberNum = request.query_params.get("memberNum", "1")
     req_trainType = request.query_params.get("trainType", "ktx")
@@ -71,7 +72,9 @@ def get_train_list(request):
     arrival_station.send_keys(req_arrivalPoint)
     month.send_keys(req_month)
     day.send_keys(req_day)
-    hour.send_keys(0)
+
+    hourSelect = Select(hour)
+    hourSelect.select_by_value(req_hour)
 
     # 사용자 요청 수 대로 선택
     memberSelect = Select(members)
