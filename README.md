@@ -50,6 +50,9 @@
 ---
 
 ### TEST postman settings
+
+https://buildabetterworld.tistory.com/75
+
 ![img.png](img.png)
 ![img_1.png](img_1.png)
 
