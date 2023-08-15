@@ -6,6 +6,7 @@ from django.views import View
 from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+from datetime import datetime, timedelta
 from macro.common import get_web_site_crawling
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
@@ -25,7 +26,7 @@ class TrainReservation(viewsets.GenericViewSet, mixins.ListModelMixin, View):
             if is_valid_request(request):
 
                 reservation_model = reservation_model_setter(request)
-                train_reserve(train_model=reservation_model)
+                train_reserve(reservation_model=reservation_model)
             else:
                 return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
 
@@ -44,13 +45,20 @@ def is_valid_request(request):
         req_date = request.data["date"]
         req_memberNum = request.data["memberNum"]
         req_trainType = request.data["trainType"]
-        req_contact_to_be_notified = request.data["contact"]
+        req_contact = request.data["contact"]
+        req_seatType = request.data["seatType"]
 
-        if req_memberNum <=0:
+        req_memberNum = int(req_memberNum)
+
+        if req_memberNum <= 0:
             return False
 
-        if req_contact_to_be_notified == "":
+        if req_contact == "":
             return False
+        
+        # default 일반 좌석
+        if req_seatType == "":
+            req_seatType="일반"
 
         # 현재는 ktx만 지원
         if req_trainType != 'ktx':
@@ -79,19 +87,143 @@ def reservation_model_setter(request):
     reservation_model.date = request.data["date"]
     reservation_model.year = reservation_model.date[:4]
     reservation_model.month = reservation_model.date[5:7]
-    reservation_model.day = reservation_model.date[8:]
+    reservation_model.day = reservation_model.date[8:10]
+    reservation_model.hour = reservation_model.date[11:13]
     reservation_model.member_num = request.data["memberNum"]
     reservation_model.train_type = request.data["trainType"]
     reservation_model.contact = request.data["contact"]
+    reservation_model.seat_type = request.data["seatType"]
 
     logger.info(f' train models : {reservation_model.__dict__}')
     return reservation_model
 
-def train_reserve(train_model):
+def train_reserve(reservation_model):
 
     # 최대 30 분 동안 반복해서 서치
     start_time = time.time()
     end_time = start_time + 30 * 60
+
+    # get driver - 목록 조회 페이지에서만 동작해야한다.
+    reserve_driver = get_web_site_crawling()
+    url = reserve_driver.current_url
+    logger.info(f' current url : {url}')
+
+    # 예약 가능한 객실이 있는 기차 선택
+    table = reserve_driver.find_element(By.ID, "tableResult")
+
+    trs = table.find_elements(By.TAG_NAME, "tr")
+
+    row_data = []
+
+    current_time = datetime.now()
+
+    current_hour = current_time.hour
+    current_minute = current_time.minute
+
+    now_time = f"{current_hour:02d}:{current_minute:02d}"
+
+    logger.info(f" now_time : {now_time}")
+
+    for tr in trs:
+        count = 0
+        td_objs = tr.find_elements(By.TAG_NAME, "td")
+
+        for td in td_objs:
+            count += 1
+            if count == 3:
+                go = td.text
+                go = go.replace("\n", " ")
+                continue
+
+            if count == 4:
+                end = td.text
+                end = end.replace("\n", " ")
+                continue
+
+            try:
+                # 특실
+                if count == 5:
+                    a_tag = td.find_element(By.TAG_NAME, "a")
+                    if a_tag:
+                        img_tag = a_tag.find_element(By.TAG_NAME, "img")
+                        # btnRsv2_2 값이면 예매 가능
+                        if img_tag:
+                            btn_name = img_tag.get_attribute('name')
+                            if btn_name.__eq__("btnRsv2_0") or btn_name.__eq__("btnRsv2_1")\
+                                    or btn_name.__eq__("btnRsv2_2") or btn_name.__eq__("btnRsv2_3")\
+                                    or btn_name.__eq__("btnRsv2_4") or btn_name.__eq__("btnRsv2_5")\
+                                    or btn_name.__eq__("btnRsv2_6") or btn_name.__eq__("btnRsv2_7")\
+                                    or btn_name.__eq__("btnRsv2_8") or btn_name.__eq__("btnRsv2_9"):
+
+                                if reservation_model.seat_type =="특실":
+                                    # 출발 시간이 20 분 넘게 남았는가?
+                                    go = go[4:8]
+                                    logger.info(f' go time : {go}')
+                                    hour, minute = map(int, go.split(":"))
+                                    going = datetime(int(reservation_model.year), int(reservation_model.month),
+                                                     int(reservation_model.day), int(hour), int(minute))
+                                    current_time = datetime.now()
+
+                                    if (going - current_time) >= timedelta(minutes=20):
+                                        img_tag.click()
+                                        # 예약하기 페이지 이동
+                                        reserve_driver.get(reserve_driver.current_url)
+                                        paying_btn = reserve_driver.find_element(By.ID,"btn_next")
+                                        paying_btn.click()
+
+                                        # 결제하기 페이지 이동.
+                                        reserve_driver.get(reserve_driver.current_url)
+                                        
+                                        # 장바구니 버튼 클릭
+                                        
+                                        break
+
+            except NoSuchElementException as err:
+                logger.info("특실 매진")
+
+            try:
+                # 일반실
+                if count == 6:
+                    a_tag = td.find_element(By.TAG_NAME, "a")
+                    if a_tag:
+                        img_tag = a_tag.find_element(By.TAG_NAME, "img")
+                        # btnRsv1_0 값이면 예매 가능
+                        if img_tag:
+                            btn_name = img_tag.get_attribute('name')
+                            if btn_name.__eq__("btnRsv1_0") or btn_name.__eq__("btnRsv1_1") \
+                                    or btn_name.__eq__("btnRsv1_2") or btn_name.__eq__("btnRsv1_3") \
+                                    or btn_name.__eq__("btnRsv1_4") or btn_name.__eq__("btnRsv1_5") \
+                                    or btn_name.__eq__("btnRsv1_6") or btn_name.__eq__("btnRsv1_7") \
+                                    or btn_name.__eq__("btnRsv1_8") or btn_name.__eq__("btnRsv1_9"):
+
+                                if reservation_model.seat_type =="일반":
+                                    # 출발 시간이 20 분 넘게 남았는가?
+                                    go = go[4:8]
+                                    logger.info(f' go time : {go}')
+                                    hour, minute = map(int, go.split(":"))
+                                    going = datetime(int(reservation_model.year), int(reservation_model.month),
+                                                     int(reservation_model.day), int(hour), int(minute))
+
+                                    current_time = datetime.now()
+
+                                    if (going - current_time) >= timedelta(minutes=20):
+                                        img_tag.click()
+                                        # 페이지 이동.
+                                        reserve_driver.get(reserve_driver.current_url)
+                                        paying_btn = reserve_driver.find_element(By.ID,"btn_next")
+                                        paying_btn.click()
+
+                                        # 페이지 이동.
+                                        reserve_driver.get(reserve_driver.current_url)
+
+                                        # 장바구니 버튼 클릭
+
+                                        break
+
+
+            except NoSuchElementException as err:
+                logger.info("일반실 매진")
+
 
     # while time.time() < end_time:
     #
