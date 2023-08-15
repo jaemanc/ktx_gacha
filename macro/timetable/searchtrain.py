@@ -22,13 +22,14 @@ class Train(viewsets.GenericViewSet, mixins.ListModelMixin, View):
         logger.debug(f'request_data: {request.data}')
 
         try:
-            pages = get_train_list(request)
+            row_data = get_train_list(request)
+
         except Exception as err:
             logger.debug(f'v1/train error: {traceback.format_exc()}')
-            logging.debug(f'update_user_profile_info ERROR :: {err}')
-            return Response(data=pages, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.debug(f'get train list error:  {err}')
+            return Response(data=row_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(data=pages, status=status.HTTP_200_OK)
+        return Response(data=row_data, status=status.HTTP_200_OK)
 
 
 def get_train_list(request):
@@ -104,10 +105,12 @@ def get_train_list(request):
             count += 1
             if count == 3:
                 go = td.text
+                go = go.replace("\n", " ")
                 continue
 
             if count == 4:
                 end = td.text
+                end = end.replace("\n", " ")
                 continue
 
             try:
@@ -158,4 +161,4 @@ def get_train_list(request):
 
     logger.info(row_data)
 
-    return train_search
+    return row_data

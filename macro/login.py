@@ -39,15 +39,10 @@ def login(request):
     login_page = get_web_site_crawling(url=login_web_site_url)
     req_membershipNum = request.data['membershipNum']
     req_password = request.data['password']
-
-    logger.debug(f'request Data : {request.data}')
-
     membernumbs = login_page.find_element(By.ID, "txtMember")
     password = login_page.find_element(By.ID, "txtPwd")
-
     membernumbs.send_keys(req_membershipNum)
     password.send_keys(req_password)
-
     login_btn = login_page.find_element(By.XPATH,'//img[@src="/images/btn_login.gif"]')
     login_btn.click()
 
