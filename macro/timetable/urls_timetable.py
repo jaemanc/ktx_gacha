@@ -3,7 +3,7 @@ from macro.timetable.train_reservation import TrainReservation
 from django.urls import path
 
 from macro.login import Login
-from macro.timetable.searchtrain import Train
+from macro.timetable.search_train import Train
 
 urlpatterns = [
     path('v1/trains', Train.as_view(({"get": "get_train"}))),

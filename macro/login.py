@@ -26,24 +26,36 @@ class Login(viewsets.GenericViewSet, mixins.ListModelMixin, View):
         try:
             pages = login(request)
 
+            return Response(data=pages, status=status.HTTP_200_OK)
+
         except Exception as err:
             logger.debug(f'v1/login error: {traceback.format_exc()}')
             logger.debug(f'{err}')
             return Response(data=pages, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(data=pages, status=status.HTTP_200_OK)
-
 
 def login(request):
-    login_web_site_url = "https://www.letskorail.com/korail/com/login.do"
+
+    login_web_site_url = "https://www.letskorail.com"
     login_page = get_web_site_crawling(url=login_web_site_url)
     req_membershipNum = request.data['membershipNum']
     req_password = request.data['password']
-    membernumbs = login_page.find_element(By.ID, "txtMember")
+
+    logger.info(f'login pages 11: {login_page.current_url}')
+
+    login_page.implicitly_wait(3)
+
+    # 로그인 페이지 이동.
+    go_to_login_page_button = login_page.find_element(By.XPATH, '//img[@src="/images/gnb_login.gif"]')
+    go_to_login_page_button.click()
+    login_page.implicitly_wait(3)
+
+    member_numbs = login_page.find_element(By.ID, "txtMember")
+    member_numbs.send_keys(req_membershipNum)
+
     password = login_page.find_element(By.ID, "txtPwd")
-    membernumbs.send_keys(req_membershipNum)
     password.send_keys(req_password)
-    login_btn = login_page.find_element(By.XPATH,'//img[@src="/images/btn_login.gif"]')
+    login_btn = login_page.find_element(By.XPATH, '//img[@src="/images/btn_login.gif"]')
     login_btn.click()
 
     return login_page
