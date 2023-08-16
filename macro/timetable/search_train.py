@@ -141,7 +141,6 @@ def get_train_list(request):
 
             try:
                 # 특실
-                # XPATH를 사용하여 요소 찾기
                 element = td.find_element(By.TAG_NAME, "img")
 
                 img_name = element.get_attribute("name")
@@ -149,10 +148,10 @@ def get_train_list(request):
 
                 if img_name in btn_names_special:
                     row_data.append({
-                                    "go": go,
-                                    "end": end,
-                                    "kind": "특실"
-                                })
+                        "go": go,
+                        "end": end,
+                        "kind": "특실"
+                    })
 
             except NoSuchElementException as err:
                 logger.info("특실 매진")

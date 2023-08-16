@@ -25,6 +25,10 @@ def get_web_site_crawling(**kwargs):
         # 웹사이트 URL 설정
         website_url = url  # 대상 웹사이트 URL
         driver.get(website_url)
+
+        alert = driver.switch_to.alert
+        alert.dismiss()
+
         return driver
 
     except Exception as err:

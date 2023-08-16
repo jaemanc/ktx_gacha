@@ -1,11 +1,15 @@
 import logging
+import threading
 import time
 import traceback
 
 from django.views import View
 from selenium.common import NoSuchElementException
+from selenium import webdriver
+from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from datetime import datetime, timedelta
 from macro.common import get_web_site_crawling
 from rest_framework import status, viewsets, mixins
@@ -14,6 +18,8 @@ from rest_framework.response import Response
 from macro.timetable.models.reservation_model import ReservationModel
 
 logger = logging.getLogger()
+
+semaphore = threading.Semaphore(value=1)
 
 
 class TrainReservation(viewsets.GenericViewSet, mixins.ListModelMixin, View):
@@ -106,8 +112,10 @@ def train_reserve(reservation_model):
 
     # get driver - 목록 조회 페이지에서만 동작해야한다.
     reserve_driver = get_web_site_crawling()
+
     url = reserve_driver.current_url
     logger.info(f' current url : {url}')
+
 
     # 예약 가능한 객실이 있는 기차 선택
     table = reserve_driver.find_element(By.ID, "tableResult")
@@ -124,111 +132,189 @@ def train_reserve(reservation_model):
     now_time = f"{current_hour:02d}:{current_minute:02d}"
 
     logger.info(f" now_time : {now_time}")
+    flag = False
+
+    schedule_driver = reserve_driver
 
     for tr in trs:
         count = 0
-        td_objs = tr.find_elements(By.TAG_NAME, "td")
 
-        for td in td_objs:
-            count += 1
-            if count == 3:
-                go = td.text
-                go = go.replace("\n", " ")
-                continue
-
-            if count == 4:
-                end = td.text
-                end = end.replace("\n", " ")
-                continue
-
+        if flag:
+            schedule_driver.quit()
+        else:
             try:
-                # 특실
-                if count == 5:
-                    a_tag = td.find_element(By.TAG_NAME, "a")
-                    if a_tag:
-                        img_tag = a_tag.find_element(By.TAG_NAME, "img")
-                        # btnRsv2_2 값이면 예매 가능
-                        if img_tag:
-                            btn_name = img_tag.get_attribute('name')
-                            if btn_name.__eq__("btnRsv2_0") or btn_name.__eq__("btnRsv2_1") \
-                                    or btn_name.__eq__("btnRsv2_2") or btn_name.__eq__("btnRsv2_3") \
-                                    or btn_name.__eq__("btnRsv2_4") or btn_name.__eq__("btnRsv2_5") \
-                                    or btn_name.__eq__("btnRsv2_6") or btn_name.__eq__("btnRsv2_7") \
-                                    or btn_name.__eq__("btnRsv2_8") or btn_name.__eq__("btnRsv2_9"):
+                td_objs = tr.find_elements(By.TAG_NAME, "td")
 
-                                if reservation_model.seat_type == "특실":
-                                    # 출발 시간이 20 분 넘게 남았는가?
-                                    go = go[4:8]
-                                    logger.info(f' go time : {go}')
-                                    hour, minute = map(int, go.split(":"))
-                                    going = datetime(int(reservation_model.year), int(reservation_model.month),
-                                                     int(reservation_model.day), int(hour), int(minute))
-                                    current_time = datetime.now()
+                for td in td_objs:
+                    count += 1
 
-                                    if (going - current_time) >= timedelta(minutes=20):
-                                        img_tag.click()
-                                        # 예약하기 페이지 이동
-                                        reserve_driver.get(reserve_driver.current_url)
-                                        paying_btn = reserve_driver.find_element(By.ID, "btn_next")
+                    # td object에는 여러가지 값들이 있어서 필요한 값이 있는 순번에만 검색하도록 수정.
+                    if count in {1, 2, 7, 8, 9, 10, 11, 12, 13, 14}:
+                        continue
+
+                    if count == 3:
+                        go = td.text
+                        go = go.replace("\n", " ")
+                        continue
+
+                    if count == 4:
+                        end = td.text
+                        end = end.replace("\n", " ")
+                        continue
+
+                    try:
+                        # 특실
+                        element = td.find_element(By.TAG_NAME, "img")
+
+                        img_name = element.get_attribute("name")
+                        btn_names_special = {f"btnRsv2_{i}" for i in range(10)}
+
+                        if img_name in btn_names_special:
+                            if reservation_model.seat_type == "특실":
+                                # 출발 시간이 20 분 넘게 남았는가?
+                                go = go[4:8]
+                                logger.info(f' 특실 예약합니다. {go}')
+                                hour, minute = map(int, go.split(":"))
+                                going = datetime(int(reservation_model.year), int(reservation_model.month),
+                                                 int(reservation_model.day), int(hour), int(minute))
+                                current_time = datetime.now()
+
+                                if (going - current_time) >= timedelta(minutes=20):
+                                    element.click()
+
+                                    while True:
+                                        try:
+                                            # alert 창 확인 처리.
+                                            alert = Alert(schedule_driver)
+                                            alert.accept()
+                                        except:
+                                            break
+
+                                    # 예약하기 페이지 이동
+                                    schedule_driver.get(schedule_driver.current_url)
+                                    logger.info(f' current url :: {schedule_driver.current_url}')
+                                    schedule_driver.implicitly_wait(3)
+
+                                    if schedule_driver.current_url != url:
+                                        schedule_driver.back()
+                                        schedule_driver.get(schedule_driver.current_url)
+
+                                        schedule_driver.implicitly_wait(3)
+
+                                    else:
+                                        paying_btn = schedule_driver.find_element(By.ID, "btn_next")
                                         paying_btn.click()
 
-                                        # 결제하기 페이지 이동.
-                                        reserve_driver.get(reserve_driver.current_url)
+                                        while True:
+                                            try:
+                                                # alert 창 확인 처리.
+                                                alert = Alert(schedule_driver)
+                                                alert.accept()
+                                            except:
+                                                break
+                                    #
+                                    # # 페이지 이동 결제하기 클릭
+                                    # schedule_driver.get(schedule_driver.current_url)
+                                    #
+                                    # # 페이지 이동 장바구니 클릭
+                                    # shopping_basket = schedule_driver.find_element(By.XPATH, "//a[contains(span, '장바구니')]")
+                                    # shopping_basket.click()
 
-                                        # 장바구니 버튼 클릭
+                                    logger.info(f"특실 장바구니 예약 완려! ")
+                                    flag = True
+                    except Exception as err:
+                        logger.info(f'v1/train-reservation error 0 : {traceback.format_exc()}')
+                        logger.info(f'{err}')
+                        logger.info("특실 매진")
 
-                                        break
+                    if flag:
+                        schedule_driver.quit()
+                        break
 
-            except NoSuchElementException as err:
-                logger.info("특실 매진")
+                    try:
+                        # 일반실 예약하기 클릭
+                        element = td.find_element(By.TAG_NAME, "img")
 
-            try:
-                # 일반실
-                if count == 6:
-                    a_tag = td.find_element(By.TAG_NAME, "a")
-                    if a_tag:
-                        img_tag = a_tag.find_element(By.TAG_NAME, "img")
-                        # btnRsv1_0 값이면 예매 가능
-                        if img_tag:
-                            btn_name = img_tag.get_attribute('name')
-                            if btn_name.__eq__("btnRsv1_0") or btn_name.__eq__("btnRsv1_1") \
-                                    or btn_name.__eq__("btnRsv1_2") or btn_name.__eq__("btnRsv1_3") \
-                                    or btn_name.__eq__("btnRsv1_4") or btn_name.__eq__("btnRsv1_5") \
-                                    or btn_name.__eq__("btnRsv1_6") or btn_name.__eq__("btnRsv1_7") \
-                                    or btn_name.__eq__("btnRsv1_8") or btn_name.__eq__("btnRsv1_9"):
+                        img_name = element.get_attribute("name")
+                        btn_names_special = {f"btnRsv1_{i}" for i in range(10)}
 
-                                if reservation_model.seat_type == "일반":
-                                    # 출발 시간이 20 분 넘게 남았는가?
-                                    go = go[4:8]
-                                    logger.info(f' go time : {go}')
-                                    hour, minute = map(int, go.split(":"))
-                                    going = datetime(int(reservation_model.year), int(reservation_model.month),
-                                                     int(reservation_model.day), int(hour), int(minute))
+                        if img_name in btn_names_special:
 
-                                    current_time = datetime.now()
+                            if reservation_model.seat_type == "일반":
+                                # 출발 시간이 20 분 넘게 남았는가?
+                                go = go[4:8]
+                                hour, minute = map(int, go.split(":"))
+                                going = datetime(int(reservation_model.year), int(reservation_model.month),
+                                                 int(reservation_model.day), int(hour), int(minute))
 
-                                    if (going - current_time) >= timedelta(minutes=20):
-                                        img_tag.click()
-                                        # 페이지 이동.
-                                        reserve_driver.get(reserve_driver.current_url)
-                                        paying_btn = reserve_driver.find_element(By.ID, "btn_next")
+                                current_time = datetime.now()
+
+                                if (going - current_time) >= timedelta(minutes=20):
+                                    element.click()
+
+                                    logger.info(f' 일반실 예약합니다. {go}')
+
+                                    while True:
+                                        try:
+                                            # alert 창 확인 처리.
+                                            alert = Alert(schedule_driver)
+                                            alert.accept()
+                                        except:
+                                            break
+
+                                    # 페이지 이동 결제하기 클릭
+                                    schedule_driver.get(schedule_driver.current_url)
+                                    logger.info(f' current url :: {schedule_driver.current_url}')
+
+                                    schedule_driver.implicitly_wait(3)
+                                    try:
+                                        paying_btn = schedule_driver.find_element(By.ID, "btn_next")
                                         paying_btn.click()
+                                    except:
+                                        schedule_driver.back()
+                                        logger.info(f' 원래 검색페이지로 되돌려야해욥..')
 
-                                        # 페이지 이동.
-                                        reserve_driver.get(reserve_driver.current_url)
+                                    while True:
+                                        try:
+                                            # alert 창 확인 처리.
+                                            alert = Alert(schedule_driver)
+                                            alert.accept()
+                                        except:
+                                            break
 
-                                        # 장바구니 버튼 클릭
+                                    # # 페이지 이동 장바구니 클릭
+                                    # schedule_driver.get(schedule_driver.current_url)
+                                    # shopping_basket = schedule_driver.find_element(By.XPATH, "//a[contains(span, '장바구니')]")
+                                    # shopping_basket.click()
+                                    #
+                                    # logger.info(f"일반실 장바구니 예약 완려! ")
+                                    # flag = True
 
-                                        break
+                    except Exception as err:
+                        logger.info(f'v1/train-reservation error 1: {traceback.format_exc()}')
+                        logger.info(f'{err}')
+                        logger.info("일반실 매진")
+                        logger.info(f' current : {schedule_driver.current_url} , default : {url}')
 
+                        if schedule_driver.current_url != url:
+                            flag = True
+                            break
 
-            except NoSuchElementException as err:
-                logger.info("일반실 매진")
+                    if flag:
+                        break
 
-    # while time.time() < end_time:
-    #
-    #     time.sleep(5)
+            except Exception as err:
+                logger.debug(f'v1/train-reservation error 2: {traceback.format_exc()}')
+                logger.debug(f'{err}')
 
-    logger.info(" 시간 지났음다 ㅜㅜ 다시 요청 해주세요. ")
+                if schedule_driver.current_url != url:
+                    flag = True
+                    schedule_driver.quit()
+                    break
 
-    return None
+            if flag:
+                break
+
+        logger.info(f" 예약 cycle 완려! ")
+
+    return flag

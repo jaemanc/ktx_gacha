@@ -26,12 +26,13 @@ class Login(viewsets.GenericViewSet, mixins.ListModelMixin, View):
         try:
             pages = login(request)
 
-            return Response(data=pages, status=status.HTTP_200_OK)
+            logger.info(f" login success!! ")
+            return Response(data=request.data, status=status.HTTP_200_OK)
 
         except Exception as err:
             logger.debug(f'v1/login error: {traceback.format_exc()}')
             logger.debug(f'{err}')
-            return Response(data=pages, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(data=request.data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 def login(request):
