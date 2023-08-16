@@ -2,7 +2,7 @@ import logging
 import traceback
 
 from django.views import View
-from selenium.common import NoSuchElementException
+from selenium.common import NoSuchElementException, UnexpectedAlertPresentException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from macro.common import get_web_site_crawling
@@ -22,20 +22,37 @@ class Train(viewsets.GenericViewSet, mixins.ListModelMixin, View):
         logger.debug(f'request_data: {request.data}')
 
         try:
-            row_data = get_train_list(request)
+            # 오늘 날짜 이전 데이터 조회 방어
+            if is_valid_date(request):
+                row_data = get_train_list(request)
+                return Response(data=row_data, status=status.HTTP_200_OK)
+            else:
+                return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as err:
             logger.debug(f'v1/train error: {traceback.format_exc()}')
             logger.debug(f'get train list error:  {err}')
-            return Response(data=row_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(data=None, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(data=row_data, status=status.HTTP_200_OK)
 
+def is_valid_date(request):
+    req_date = request.query_params.get("date", "1993-07-17 01")
+    # 주어진 날짜와 시간을 datetime 객체로 변환
+    requested_time = datetime.strptime(req_date, "%Y-%m-%d %H")
+
+    # 현재 시간 구하기
+    current_time = datetime.now()
+
+    # 주어진 시간이 현재 시간보다 이전인지 확인
+    if requested_time <= current_time:
+        return False
+    else:
+        return True
 
 def get_train_list(request):
     req_startingPoint = request.query_params.get("startingPoint", "용산")
     req_arrivalPoint = request.query_params.get("arrivalPoint", "익산")
-    req_date = request.query_params.get("date", "1993-07-17")
+    req_date = request.query_params.get("date", "1993-07-17 01")
 
     req_year = req_date[:4]
     req_month = req_date[5:7]
@@ -94,6 +111,7 @@ def get_train_list(request):
     # 조회 결과 테이블 정보 파싱
     # train_search.get(train_search.current_url)
     # logger.info(f' 페이지 이동 : {train_search.current_url}' )
+
     table = train_search.find_element(By.ID, "tableResult")
 
     trs = table.find_elements(By.TAG_NAME, "tr")
@@ -106,6 +124,11 @@ def get_train_list(request):
 
         for td in td_objs:
             count += 1
+
+            # td object에는 여러가지 값들이 있어서 필요한 값이 있는 순번에만 검색하도록 수정.
+            if count in {1, 2, 7, 8, 9, 10, 11, 12, 13, 14}:
+                continue
+
             if count == 3:
                 go = td.text
                 go = go.replace("\n", " ")
@@ -118,46 +141,35 @@ def get_train_list(request):
 
             try:
                 # 특실
-                if count == 5:
-                    a_tag = td.find_element(By.TAG_NAME, "a")
-                    if a_tag:
-                        img_tag = a_tag.find_element(By.TAG_NAME, "img")
-                        # btnRsv2_2 값이면 예매 가능
-                        if img_tag:
-                            btn_name = img_tag.get_attribute('name')
-                            if btn_name.__eq__("btnRsv2_0") or btn_name.__eq__("btnRsv2_1")\
-                                    or btn_name.__eq__("btnRsv2_2") or btn_name.__eq__("btnRsv2_3")\
-                                    or btn_name.__eq__("btnRsv2_4") or btn_name.__eq__("btnRsv2_5")\
-                                    or btn_name.__eq__("btnRsv2_6") or btn_name.__eq__("btnRsv2_7")\
-                                    or btn_name.__eq__("btnRsv2_8") or btn_name.__eq__("btnRsv2_9"):
-                                row_data.append({
+                # XPATH를 사용하여 요소 찾기
+                element = td.find_element(By.TAG_NAME, "img")
+
+                img_name = element.get_attribute("name")
+                btn_names_special = {f"btnRsv2_{i}" for i in range(10)}
+
+                if img_name in btn_names_special:
+                    row_data.append({
                                     "go": go,
                                     "end": end,
                                     "kind": "특실"
                                 })
+
             except NoSuchElementException as err:
                 logger.info("특실 매진")
 
             try:
                 # 일반실
-                if count == 6:
-                    a_tag = td.find_element(By.TAG_NAME, "a")
-                    if a_tag:
-                        img_tag = a_tag.find_element(By.TAG_NAME, "img")
-                        # btnRsv1_0 값이면 예매 가능
-                        if img_tag:
-                            btn_name = img_tag.get_attribute('name')
-                            if btn_name.__eq__("btnRsv1_0") or btn_name.__eq__("btnRsv1_1") \
-                                    or btn_name.__eq__("btnRsv1_2") or btn_name.__eq__("btnRsv1_3") \
-                                    or btn_name.__eq__("btnRsv1_4") or btn_name.__eq__("btnRsv1_5") \
-                                    or btn_name.__eq__("btnRsv1_6") or btn_name.__eq__("btnRsv1_7") \
-                                    or btn_name.__eq__("btnRsv1_8") or btn_name.__eq__("btnRsv1_9"):
-                                row_data.append({
-                                    "go": go,
-                                    "end": end,
-                                    "kind": "일반실"
-                                })
+                element = td.find_element(By.TAG_NAME, "img")
 
+                img_name = element.get_attribute("name")
+                btn_names_special = {f"btnRsv1_{i}" for i in range(10)}
+
+                if img_name in btn_names_special:
+                    row_data.append({
+                        "go": go,
+                        "end": end,
+                        "kind": "일반"
+                    })
 
             except NoSuchElementException as err:
                 logger.info("일반실 매진")

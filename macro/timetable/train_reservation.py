@@ -15,6 +15,7 @@ from macro.timetable.models.reservation_model import ReservationModel
 
 logger = logging.getLogger()
 
+
 class TrainReservation(viewsets.GenericViewSet, mixins.ListModelMixin, View):
     def train_reservation(self, request):
         logger.debug(f'url : v1/train-reservattion')
@@ -22,7 +23,7 @@ class TrainReservation(viewsets.GenericViewSet, mixins.ListModelMixin, View):
         logger.debug(f'request_data: {request.data}')
 
         try:
-            #validation
+            # validation
             if is_valid_request(request):
 
                 reservation_model = reservation_model_setter(request)
@@ -55,21 +56,21 @@ def is_valid_request(request):
 
         if req_contact == "":
             return False
-        
+
         # default 일반 좌석
         if req_seatType == "":
-            req_seatType="일반"
+            req_seatType = "일반"
 
         # 현재는 ktx만 지원
         if req_trainType != 'ktx':
             return False
-        #Todo
+        # Todo
         # 시작역에 없는 역이 입력됐을 경우 역이 많다..
         #   return False
-        #Todo
+        # Todo
         # 도착역에 없는 역이 입력됐을 경우 역이 많다..
         #  return False
-        #Todo
+        # Todo
         # 현재 시간 보다 이전의 요청 날짜가 들어 올 경우.
         # return False
 
@@ -79,8 +80,8 @@ def is_valid_request(request):
         logger.info(f'request value not appropriate / REQ VAL : {request.data}')
         return False
 
-def reservation_model_setter(request):
 
+def reservation_model_setter(request):
     reservation_model = ReservationModel()
     reservation_model.starting_point = request.data['startingPoint']
     reservation_model.arrival_point = request.data["arrivalPoint"]
@@ -97,8 +98,8 @@ def reservation_model_setter(request):
     logger.info(f' train models : {reservation_model.__dict__}')
     return reservation_model
 
-def train_reserve(reservation_model):
 
+def train_reserve(reservation_model):
     # 최대 30 분 동안 반복해서 서치
     start_time = time.time()
     end_time = start_time + 30 * 60
@@ -149,13 +150,13 @@ def train_reserve(reservation_model):
                         # btnRsv2_2 값이면 예매 가능
                         if img_tag:
                             btn_name = img_tag.get_attribute('name')
-                            if btn_name.__eq__("btnRsv2_0") or btn_name.__eq__("btnRsv2_1")\
-                                    or btn_name.__eq__("btnRsv2_2") or btn_name.__eq__("btnRsv2_3")\
-                                    or btn_name.__eq__("btnRsv2_4") or btn_name.__eq__("btnRsv2_5")\
-                                    or btn_name.__eq__("btnRsv2_6") or btn_name.__eq__("btnRsv2_7")\
+                            if btn_name.__eq__("btnRsv2_0") or btn_name.__eq__("btnRsv2_1") \
+                                    or btn_name.__eq__("btnRsv2_2") or btn_name.__eq__("btnRsv2_3") \
+                                    or btn_name.__eq__("btnRsv2_4") or btn_name.__eq__("btnRsv2_5") \
+                                    or btn_name.__eq__("btnRsv2_6") or btn_name.__eq__("btnRsv2_7") \
                                     or btn_name.__eq__("btnRsv2_8") or btn_name.__eq__("btnRsv2_9"):
 
-                                if reservation_model.seat_type =="특실":
+                                if reservation_model.seat_type == "특실":
                                     # 출발 시간이 20 분 넘게 남았는가?
                                     go = go[4:8]
                                     logger.info(f' go time : {go}')
@@ -168,14 +169,14 @@ def train_reserve(reservation_model):
                                         img_tag.click()
                                         # 예약하기 페이지 이동
                                         reserve_driver.get(reserve_driver.current_url)
-                                        paying_btn = reserve_driver.find_element(By.ID,"btn_next")
+                                        paying_btn = reserve_driver.find_element(By.ID, "btn_next")
                                         paying_btn.click()
 
                                         # 결제하기 페이지 이동.
                                         reserve_driver.get(reserve_driver.current_url)
-                                        
+
                                         # 장바구니 버튼 클릭
-                                        
+
                                         break
 
             except NoSuchElementException as err:
@@ -196,7 +197,7 @@ def train_reserve(reservation_model):
                                     or btn_name.__eq__("btnRsv1_6") or btn_name.__eq__("btnRsv1_7") \
                                     or btn_name.__eq__("btnRsv1_8") or btn_name.__eq__("btnRsv1_9"):
 
-                                if reservation_model.seat_type =="일반":
+                                if reservation_model.seat_type == "일반":
                                     # 출발 시간이 20 분 넘게 남았는가?
                                     go = go[4:8]
                                     logger.info(f' go time : {go}')
@@ -210,7 +211,7 @@ def train_reserve(reservation_model):
                                         img_tag.click()
                                         # 페이지 이동.
                                         reserve_driver.get(reserve_driver.current_url)
-                                        paying_btn = reserve_driver.find_element(By.ID,"btn_next")
+                                        paying_btn = reserve_driver.find_element(By.ID, "btn_next")
                                         paying_btn.click()
 
                                         # 페이지 이동.
@@ -224,7 +225,6 @@ def train_reserve(reservation_model):
             except NoSuchElementException as err:
                 logger.info("일반실 매진")
 
-
     # while time.time() < end_time:
     #
     #     time.sleep(5)
@@ -232,4 +232,3 @@ def train_reserve(reservation_model):
     logger.info(" 시간 지났음다 ㅜㅜ 다시 요청 해주세요. ")
 
     return None
-
