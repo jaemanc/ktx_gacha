@@ -2,6 +2,13 @@
 
 ---
 
+
+## 동작 예시 
+[ARCHIVE.md](ARCHIVE.md)
+
+---
+
+
 ## settings
 * python 3.8
 * django 
