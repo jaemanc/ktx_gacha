@@ -176,3 +176,5 @@ def get_train_list(request):
     logger.info(row_data)
 
     return row_data
+
+
