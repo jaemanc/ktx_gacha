@@ -13,6 +13,9 @@
 * python 3.8
 * django 
 * selenium
+* github ci/cd 
+* docker
+* oracle cloud
 * DB 안씁니다
 
 
@@ -69,6 +72,7 @@
 ### 프로젝트 세팅
 1. env 설정으로 코드값들 변경
 2. DB 사용 X
+
 
 ### 사용자 연계
 1. 외부 API 연동 ( 카카오 채널 또는 슬랙 )
