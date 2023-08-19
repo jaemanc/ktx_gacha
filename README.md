@@ -16,7 +16,6 @@
 * github ci/cd 
 * docker
 * oracle cloud
-* DB 안씁니다
 
 
 ---
