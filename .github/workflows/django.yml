@@ -58,6 +58,4 @@ jobs:
           script: |
             sudo docker rm -f $(docker ps -qa)
             sudo docker pull ${{ secrets.DOCKER_REPO }}
-            sudo docker-compose up -d
-            sudo docker image prune -f
-            sudo docker run -d --name ktx-gacha-for-ubuntu2 -p 8000:8000 ${{ secrets.DOCKER_REPO }}
+            sudo docker run -d --name ktx-gacha-for-ubuntu -e SECRET_KEY='d4ue0ycsr&9u&7u@_iplzg^cciz7qv7t4-oek#oo(^3k*cbs+&' -p 8000:8000 ${{ secrets.DOCKER_REPO }}
