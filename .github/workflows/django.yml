@@ -44,13 +44,13 @@ jobs:
           push: true
           platforms: linux/amd64, linux/arm64
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/ktx-gacha:latest
-      - name: Image digest
+      - name: Image digest정
         run: echo ${{ steps.docker_build.outputs.digest }}
   deploy :
+    runs-on: ubuntu
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
