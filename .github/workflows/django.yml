@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: oraclecloud
+    runs-on: ubuntu
     strategy:
       max-parallel: 4
       matrix:
@@ -26,7 +26,7 @@ jobs:
         pip install -r requirements.txt
   build-image:
     needs: [build]
-    runs-on: oraclecloud
+    runs-on: ubuntu
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -46,9 +46,20 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/ktx-gacha:latest
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
-        
-    # - name: Run Tests
-    #   env: 
-    #     SECRET_KEY: ${{ secrets.SECRET_KEY }}
-    #   run: |
-    #     python manage.py test
+  deploy :
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY}}
+          script: |
+            sudo docker rm -f $(docker ps -qa)
+            sudo docker pull ${{ secrets.DOCKER_REPO }}
+            docker-compose up -d
+            docker image prune -f
+            docker run -d --name ktx-gacha-for-ubuntu -p 8000:8000 ${{ secrets.DOCKER_REPO }}
