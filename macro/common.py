@@ -13,6 +13,8 @@ customService = Service(ChromeDriverManager().install())
 customOptions = Options()
 customOptions.add_argument("disable-infobars")
 customOptions.add_argument("--disable-extensions")
+customOptions.add_argument('--headless')
+customOptions.add_argument('--no-sandbox')
 driver = webdriver.Chrome(service=customService, options=customOptions)
 
 

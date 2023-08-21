@@ -14,8 +14,8 @@
 * django 
 * selenium
 * github ci/cd 
-* docker
-* oracle cloud
+* oracle cloud - ubuntu os 사용 필요 / google chrome 설치 선행 필요 
+* docker 
 
 
 ---

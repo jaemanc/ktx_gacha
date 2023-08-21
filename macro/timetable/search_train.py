@@ -45,6 +45,7 @@ def is_valid_date(request):
 
     # 주어진 시간이 현재 시간보다 이전인지 확인
     if requested_time <= current_time:
+        logger.info(f' requested_time : {requested_time}... why..? ')
         return False
     else:
         return True
