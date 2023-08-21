@@ -49,10 +49,8 @@ jobs:
     needs: [build-image]
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.3
+      - name: ssh remote commands
+        uses: appleboy/ssh-action@v0.1.4  # 나의 구세주 appleboy 도와주십시오
         with:
           host: ${{ secrets.HOST }}
           username: ubuntu
