@@ -1,4 +1,4 @@
-name: Build and Deploy to oracle cloud
+name: Build and Deploy to oracle cloud ubuntu
 
 on:
   push:
@@ -8,12 +8,11 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
       matrix:
         python-version: [3.8]
-
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -26,7 +25,7 @@ jobs:
         pip install -r requirements.txt
   build-image:
     needs: [build]
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -47,7 +46,7 @@ jobs:
       - name: Image digest정
         run: echo ${{ steps.docker_build.outputs.digest }}
   deploy :
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@v2
