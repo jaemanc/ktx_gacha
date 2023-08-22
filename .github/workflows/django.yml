@@ -3,8 +3,6 @@ name: Build and Deploy to oracle cloud ubuntu
 on:
   push:
     branches: [ "main" ]
-#  pull_request:
-#    branches: [ "main" ]
 
 jobs:
   build:
@@ -21,15 +19,6 @@ jobs:
     needs: [build]
     runs-on: ubuntu-latest
     steps:
-#      - name: Set up QEMU
-#        uses: docker/setup-qemu-action@v1
-#      - name: Set up Docker Buildx
-#        uses: docker/setup-buildx-action@v1
-#      - name: Login to DockerHub
-#        uses: docker/login-action@v1
-        #        with:
-        #          username: ${{ secrets.DOCKERHUB_USERNAME }}
-        #          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN}}
       - name: ssh remote commands
         uses: appleboy/ssh-action@v0.1.4
         with:
@@ -40,16 +29,6 @@ jobs:
             cd /app/ktx-gacha
             sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{secrets.DOCKER_REPO}} .
             sudo docker push jaemanc/ktx-gacha-for-ubuntu:latest
-
-#      - name: Build and push
-#        id: docker_build
-#        uses: docker/build-push-action@v2
-#        with:
-#          push: true
-#          platforms: linux/amd64, linux/arm64
-#          tags: ${{ secrets.DOCKERHUB_USERNAME }}/ktx-gacha-for-ubuntu:latest
-#      - name: Image digest
-#        run: echo ${{ steps.docker_build.outputs.digest }}
   deploy :
     needs: [build-and-push]
     runs-on: ubuntu-latest
