@@ -7,55 +7,61 @@ on:
     branches: [ "main" ]
 
 jobs:
-#  build:
-#    runs-on: ubuntu-latest
-#    strategy:
-#      max-parallel: 4
-#      matrix:
-#        python-version: [3.8]
-#    steps:
-#    - uses: actions/checkout@v3
-#    - name: Set up Python ${{ matrix.python-version }}
-#      uses: actions/setup-python@v3
-#      with:
-#        python-version: ${{ matrix.python-version }}
-#    - name: Install Dependencies
-#      run: |
-#        python -m pip install --upgrade pip
-#        pip install -r requirements.txt
-#  build-image:
-#    needs: [build]
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Set up QEMU
-#        uses: docker/setup-qemu-action@v1
-#      - name: Set up Docker Buildx
-#        uses: docker/setup-buildx-action@v1
-#      - name: Login to DockerHub
-#        uses: docker/login-action@v1
-#        with:
-#          username: ${{ secrets.DOCKERHUB_USERNAME }}
-#          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN}}
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.8]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+  build-and-push:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        #        with:
+        #          username: ${{ secrets.DOCKERHUB_USERNAME }}
+        #          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN}}
+
+      - name: ssh remote commands
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{secrets.HOST}}
+          username: ubuntu
+          key: ${{secrets.SSH_KEY}}
+          script: |
+            cd /app/ktx-gacha
+            sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{secrets.DOCKER_REPO}} .
+            sudo docker push jaemanc/ktx-gacha-for-ubuntu:latest
+
 #      - name: Build and push
 #        id: docker_build
 #        uses: docker/build-push-action@v2
 #        with:
 #          push: true
 #          platforms: linux/amd64, linux/arm64
-#          tags: ${{ secrets.DOCKERHUB_USERNAME }}/ktx-gacha:latest
+#          tags: ${{ secrets.DOCKERHUB_USERNAME }}/ktx-gacha-for-ubuntu:latest
 #      - name: Image digest
 #        run: echo ${{ steps.docker_build.outputs.digest }}
   deploy :
-#    needs: [build-image]
+    needs: [build-and-push]
     runs-on: ubuntu-latest
     steps:
       - name: ssh remote commands
         uses: appleboy/ssh-action@v0.1.4  # 나의 구세주 appleboy 도와주십시오
         with:
-          host: ${{ secrets.HOST }}
+          host: ${{secrets.HOST}}
           username: ubuntu
-          key: ${{ secrets.SSH_KEY}}
+          key: ${{secrets.SSH_KEY}}
           script: |
             sudo docker rm -f $(docker ps -qa)
-            sudo docker pull ${{ secrets.DOCKER_REPO }}
-            sudo docker run -d --name ktx-gacha-for-ubuntu -e SECRET_KEY='d4ue0ycsr&9u&7u@_iplzg^cciz7qv7t4-oek#oo(^3k*cbs+&' -p 8000:8000 ${{ secrets.DOCKER_REPO }}
+            sudo docker pull ${{secrets.DOCKER_REPO}}
+            sudo docker run -d --name ktx-gacha-for-ubuntu -e SECRET_KEY='d4ue0ycsr&9u&7u@_iplzg^cciz7qv7t4-oek#oo(^3k*cbs+&' -p 8000:8000 ${{secrets.DOCKER_REPO}}
