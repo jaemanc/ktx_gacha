@@ -65,4 +65,4 @@ jobs:
                 sudo docker rm -f $(docker ps -qa)
             fi
             sudo docker pull ${{secrets.DOCKER_REPO}}
-            sudo docker run -d --name ktx-gacha-for-ubuntu -e SECRET_KEY=${{secrets.SECRET_KEY}} -p 8000:8000 ${{secrets.DOCKER_REPO}}
+            sudo docker run -d --name ktx-gacha-for-ubuntu -e SECRET_KEY="${{secrets.SECRET_KEY}}" -p 8000:8000 ${{secrets.DOCKER_REPO}}
