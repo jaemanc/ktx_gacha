@@ -44,12 +44,9 @@ def login(request):
 
     logger.info(f'driver session id :  {login_page.session_id}')
 
-    login_page.implicitly_wait(3)
-
     # 로그인 페이지 이동.
     go_to_login_page_button = login_page.find_element(By.XPATH, '//img[@src="/images/gnb_login.gif"]')
     go_to_login_page_button.click()
-    login_page.implicitly_wait(3)
 
     member_numbs = login_page.find_element(By.ID, "txtMember")
     member_numbs.send_keys(req_membershipNum)

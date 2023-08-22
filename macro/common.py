@@ -17,6 +17,7 @@ customOptions.add_argument('--no-sandbox')
 # 연속성을 위해 전역으로 세팅
 # 성능 향상을 위해 쓰지 않는 옵션은 끄는게 좋지만 그렇게 큰 차이가 나지 않음.
 driver = webdriver.Chrome(service=customService, options=customOptions)
+driver.execute_script("window.open('');")
 
 logger.info(f'driver session id :  {driver.session_id}')
 
