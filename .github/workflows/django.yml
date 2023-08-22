@@ -27,8 +27,10 @@ jobs:
           key: ${{secrets.SSH_KEY}}
           script: |
             cd /app/ktx-gacha
-            sudo docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{secrets.DOCKER_REPO}} .
-            sudo docker push jaemanc/ktx-gacha-for-ubuntu:latest
+            git reset --hard origin/main
+            git pull origin main
+            sudo docker build -t ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKER_REPO}} .
+            sudo docker push ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKER_REPO}}
   deploy :
     needs: [build-and-push]
     runs-on: ubuntu-latest
@@ -43,5 +45,5 @@ jobs:
             if [ "$(docker ps -q)" ]; then
                 sudo docker rm -f $(docker ps -qa)
             fi
-            sudo docker pull ${{secrets.DOCKER_REPO}}
-            sudo docker run -d --name ktx-gacha-for-ubuntu -e SECRET_KEY="${{secrets.SECRET_KEY}}" -p 8000:8000 ${{secrets.DOCKER_REPO}}
+            sudo docker pull ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKER_REPO}} .
+            sudo docker run -d --name ktx-gacha-for-ubuntu -e SECRET_KEY="${{secrets.SECRET_KEY}}" -p 8000:8000 ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKER_REPO}}

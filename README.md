@@ -3,12 +3,6 @@
 ---
 
 
-## 동작 예시 
-[ARCHIVE.md](ARCHIVE.md)
-
----
-
-
 ## settings
 * python 3.8
 * django 
@@ -46,7 +40,7 @@
 2. ~~목록 조회~~
 3. ~~조건에 따른 타겟 선정~~
 4. 예약을 위한 검색 반복 - 선택 결제 대기 또는 장바구니 ( 20 분 내로 결제 필요 )
-5. 알림 카카오 챗봇
+5. 알림 카카오 챗봇 <- 챗봇 테스트 사용까지 심사기간이 5일 정도 소요
 
 ###  예약
 1. 예약 방식 <br>
@@ -91,6 +85,13 @@ https://buildabetterworld.tistory.com/75
 ### Flow chart
 ![image](https://github.com/jaemanc/ktx_gacha/assets/104718153/e993b595-bb60-4e68-8bc1-9d2a8ff4f28d)
 
+---
 
 
+## 동작 예시 
+[ARCHIVE.md](ARCHIVE.md)
+## docker command 모음
+[DOCKER_COMMAND.md](DOCKER_COMMAND.md)
+
+---
 
