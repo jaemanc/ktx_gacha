@@ -30,7 +30,7 @@ jobs:
             git reset --hard origin/main
             git pull origin main
             sudo docker build -t ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKER_REPO}} .
-            sudo docker push ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKER_REPO}}
+            sudo docker push ${{secrets.DOCKERHUB_USERNAME}}/ktx-gacha-for-ubuntu
   deploy :
     needs: [build-and-push]
     runs-on: ubuntu-latest
