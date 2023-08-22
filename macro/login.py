@@ -36,13 +36,10 @@ class Login(viewsets.GenericViewSet, mixins.ListModelMixin, View):
 
 
 def login(request):
-
     login_web_site_url = "https://www.letskorail.com"
     login_page = get_web_site_crawling(url=login_web_site_url)
     req_membershipNum = request.data['membershipNum']
     req_password = request.data['password']
-
-    logger.info(f'login pages 11: {login_page.current_url}')
 
     login_page.implicitly_wait(3)
 

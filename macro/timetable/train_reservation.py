@@ -129,7 +129,7 @@ def train_reserve(reservation_model):
     flag = False
     index = 0
     while not flag:
-        logger.info(f" index : {index} , reservation_model : {reservation_model}")
+        logger.info(f" index : {index} , reservation_model : {reservation_model.__dict__}")
         flag = reservation_loop(reservation_model=reservation_model, url=url, index=index)
         index += 1
 
