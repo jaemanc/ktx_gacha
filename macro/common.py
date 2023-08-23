@@ -1,4 +1,7 @@
 import logging
+import traceback
+
+import requests
 
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
@@ -6,18 +9,21 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 
 logger = logging.getLogger()
+log_selenium = logging.getLogger('selenium')
 
-customService = Service(ChromeDriverManager().install())
+# customService = Service(ChromeDriverManager().install())
 customOptions = Options()
-customOptions.add_argument("disable-infobars")
 customOptions.add_argument("--disable-extensions")
-customOptions.add_argument('--headless')
+customOptions.add_argument('--headless=new')
 customOptions.add_argument('--no-sandbox')
 
 # 연속성을 위해 전역으로 세팅
 # 성능 향상을 위해 쓰지 않는 옵션은 끄는게 좋지만 그렇게 큰 차이가 나지 않음.
-driver = webdriver.Chrome(service=customService, options=customOptions)
+driver = webdriver.Chrome(options=customOptions)
+
 driver.execute_script("window.open('');")
+
+s = requests.session()
 
 logger.info(f'driver session id :  {driver.session_id}')
 
@@ -33,12 +39,16 @@ def get_web_site_crawling(**kwargs):
         website_url = url  # 대상 웹사이트 URL
         driver.get(website_url)
 
+
         alert = driver.switch_to.alert
         alert.dismiss()
 
         return driver
 
     except Exception as err:
+        log_selenium.info(f'{traceback.format_exc()}')
+        log_selenium.info(f'{err}')
+
         # URL 요청 없을경우
         # 기존 driver의 정보를 그대로 리턴한다.
         return driver
