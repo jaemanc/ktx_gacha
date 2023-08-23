@@ -42,31 +42,61 @@ def login(request):
 
     # login_web_site_url = "https://www.letskorail.com"
 
-    login_web_site_url = "https://www.letskorail.com/ebizprd/prdMain.do"
+    try:
+        login_web_site_url = "https://www.letskorail.com/ebizprd/prdMain.do"
 
-    login_page = get_web_site_crawling(url=login_web_site_url)
-    req_membershipNum = request.data['membershipNum']
-    req_password = request.data['password']
+        login_page = get_web_site_crawling(url=login_web_site_url)
+        req_membershipNum = request.data['membershipNum']
+        req_password = request.data['password']
 
-    logger.info(f'driver session id :  {login_page.session_id}')
+        logger.info(f'driver session id :  {login_page.session_id}')
 
-    # # 페이지의 모든 엘리먼트 가져오기
-    # elements = login_page.find_elements(By.XPATH, '//img')
-    #
-    # # 모든 엘리먼트 로그로 출력
-    # for element in elements:
-    #     logging.info(f" Element: {element.tag_name} - Text: {element.text} , {element.get_attribute('outerHTML')} ")
+        # 페이지의 모든 엘리먼트 가져오기
+        elements = login_page.find_elements(By.XPATH, '//img')
 
-    # 로그인 페이지 이동.
-    go_to_login_page_button = login_page.find_element(By.XPATH, '//img[@src="/images/gnb_login.gif"]')
-    go_to_login_page_button.click()
+        # 모든 엘리먼트 로그로 출력
+        for element in elements:
+            logging.info(f" Element: {element.tag_name} - Text: {element.text} , {element.get_attribute('outerHTML')} ")
 
-    member_numbs = login_page.find_element(By.ID, "txtMember")
-    member_numbs.send_keys(req_membershipNum)
+        # 로그인 페이지 이동.
+        go_to_login_page_button = login_page.find_element(By.XPATH, '//img[@src="/images/gnb_login.gif"]')
+        go_to_login_page_button.click()
 
-    password = login_page.find_element(By.ID, "txtPwd")
-    password.send_keys(req_password)
-    login_btn = login_page.find_element(By.XPATH, '//img[@src="/images/btn_login.gif"]')
-    login_btn.click()
+        member_numbs = login_page.find_element(By.ID, "txtMember")
+        member_numbs.send_keys(req_membershipNum)
+
+        password = login_page.find_element(By.ID, "txtPwd")
+        password.send_keys(req_password)
+        login_btn = login_page.find_element(By.XPATH, '//img[@src="/images/btn_login.gif"]')
+        login_btn.click()
+
+    except Exception as err:
+
+        login_web_site_url = "https://www.letskorail.com"
+
+        login_page = get_web_site_crawling(url=login_web_site_url)
+        req_membershipNum = request.data['membershipNum']
+        req_password = request.data['password']
+
+        logger.info(f'driver session id :  {login_page.session_id}')
+
+        # 페이지의 모든 엘리먼트 가져오기
+        elements = login_page.find_elements(By.XPATH, '//img')
+
+        # 모든 엘리먼트 로그로 출력
+        for element in elements:
+            logging.info(f" Element: {element.tag_name} - Text: {element.text} , {element.get_attribute('outerHTML')} ")
+
+        # 로그인 페이지 이동.
+        go_to_login_page_button = login_page.find_element(By.XPATH, '//img[@src="/images/gnb_login.gif"]')
+        go_to_login_page_button.click()
+
+        member_numbs = login_page.find_element(By.ID, "txtMember")
+        member_numbs.send_keys(req_membershipNum)
+
+        password = login_page.find_element(By.ID, "txtPwd")
+        password.send_keys(req_password)
+        login_btn = login_page.find_element(By.XPATH, '//img[@src="/images/btn_login.gif"]')
+        login_btn.click()
 
     return login_page
