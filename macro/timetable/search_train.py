@@ -66,6 +66,13 @@ def get_train_list(request):
     train_search_url = "https://www.letskorail.com/index.jsp"
     train_search = get_web_site_crawling(url=train_search_url)
 
+    # 페이지의 모든 엘리먼트 가져오기
+    elements = train_search.find_elements(By.XPATH, '//img')
+
+    # 모든 엘리먼트 로그로 출력
+    for element in elements:
+        logging.info(f" Element: {element.tag_name} - Text: {element.text} , {element.get_attribute('outerHTML')} ")
+
     reservation_btn = train_search.find_element(By.XPATH, '//img[@src="/images/lnb_mu01_01.gif"]')
     reservation_btn.click()
 
