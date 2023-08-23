@@ -45,5 +45,5 @@ jobs:
             if [ "$(docker ps -q)" ]; then
                 sudo docker rm -f $(docker ps -qa)
             fi
-            sudo docker pull ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKER_REPO}} .
+            sudo docker pull ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKER_REPO}}
             sudo docker run -d --name ktx-gacha-for-ubuntu -e SECRET_KEY="${{secrets.SECRET_KEY}}" -p 8000:8000 ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKER_REPO}}
