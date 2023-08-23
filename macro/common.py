@@ -16,6 +16,7 @@ customOptions = Options()
 customOptions.add_argument("--disable-extensions")
 customOptions.add_argument('--headless=new')
 customOptions.add_argument('--no-sandbox')
+customOptions.add_argument('--lang=ko-KR')
 
 # 연속성을 위해 전역으로 세팅
 # 성능 향상을 위해 쓰지 않는 옵션은 끄는게 좋지만 그렇게 큰 차이가 나지 않음.

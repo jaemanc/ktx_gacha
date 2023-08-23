@@ -63,125 +63,253 @@ def get_train_list(request):
     req_memberNum = request.query_params.get("memberNum", "1")
     req_trainType = request.query_params.get("trainType", "ktx")
 
-    train_search_url = "https://www.letskorail.com/index.jsp"
-    train_search = get_web_site_crawling(url=train_search_url)
 
-    # 페이지의 모든 엘리먼트 가져오기
-    elements = train_search.find_elements(By.XPATH, '//img')
+    try:
+        train_search_url = "https://www.letskorail.com/index.jsp"
+        # train_search_url = "https://www.letskorail.com/ebizprd/EbizPrdTicketpr21100W_pr21110.do"
 
-    # 모든 엘리먼트 로그로 출력
-    for element in elements:
-        logging.info(f" Element: {element.tag_name} - Text: {element.text} , {element.get_attribute('outerHTML')} ")
+        train_search = get_web_site_crawling(url=train_search_url)
 
-    reservation_btn = train_search.find_element(By.XPATH, '//img[@src="/images/lnb_mu01_01.gif"]')
-    reservation_btn.click()
+        # 페이지의 모든 엘리먼트 가져오기
+        elements = train_search.find_elements(By.XPATH, '//img')
 
-    # 승차권 예매 페이지 이동 후 driver 초기화
-    logger.info(f' 페이지 이동 : {train_search.current_url}')
-    train_search.get(train_search.current_url)
+        # 모든 엘리먼트 로그로 출력
+        for element in elements:
+            logging.info(f" Element: {element.tag_name} - Text: {element.text} , {element.get_attribute('outerHTML')} ")
 
-    start_station = train_search.find_element(By.ID, "start")
-    arrival_station = train_search.find_element(By.ID, "get")
+        reservation_btn = train_search.find_element(By.XPATH, '//img[@src="/images/lnb_mu01_01.gif"]')
+        reservation_btn.click()
 
-    month = train_search.find_element(By.ID, "s_month")
-    day = train_search.find_element(By.ID, "s_day")
-    hour = train_search.find_element(By.ID, "s_hour")
-    members = train_search.find_element(By.ID, "peop01")
+        # 승차권 예매 페이지 이동 후 driver 초기화
+        logger.info(f' 페이지 이동 : {train_search.current_url}')
+        train_search.get(train_search.current_url)
 
-    # 초기화
-    start_station.clear()
-    arrival_station.clear()
+        start_station = train_search.find_element(By.ID, "start")
+        arrival_station = train_search.find_element(By.ID, "get")
 
-    # 사용자 요청 값으로 세팅
-    start_station.send_keys(req_startingPoint)
-    arrival_station.send_keys(req_arrivalPoint)
-    month.send_keys(req_month)
-    day.send_keys(req_day)
+        month = train_search.find_element(By.ID, "s_month")
+        day = train_search.find_element(By.ID, "s_day")
+        hour = train_search.find_element(By.ID, "s_hour")
+        members = train_search.find_element(By.ID, "peop01")
 
-    hourSelect = Select(hour)
-    hourSelect.select_by_value(req_hour)
+        # 초기화
+        start_station.clear()
+        arrival_station.clear()
 
-    # 사용자 요청 수 대로 선택
-    memberSelect = Select(members)
-    memberSelect.select_by_value(req_memberNum)
+        # 사용자 요청 값으로 세팅
+        start_station.send_keys(req_startingPoint)
+        arrival_station.send_keys(req_arrivalPoint)
+        month.send_keys(req_month)
+        day.send_keys(req_day)
 
-    # 요청 차종 선택
-    if req_trainType == "ktx":
-        train_btn = train_search.find_element(By.ID, "selGoTrainRa00")
-        train_btn.click()
+        hourSelect = Select(hour)
+        hourSelect.select_by_value(req_hour)
 
-    # 조회 요청
-    search_btn = train_search.find_element(By.XPATH, '//img[@src="/images/btn_inq_tick.gif"]')
-    search_btn.click()
+        # 사용자 요청 수 대로 선택
+        memberSelect = Select(members)
+        memberSelect.select_by_value(req_memberNum)
 
-    train_search.implicitly_wait(3)
+        # 요청 차종 선택
+        if req_trainType == "ktx":
+            train_btn = train_search.find_element(By.ID, "selGoTrainRa00")
+            train_btn.click()
 
-    # 조회 결과 테이블 정보 파싱
-    # train_search.get(train_search.current_url)
-    # logger.info(f' 페이지 이동 : {train_search.current_url}' )
+        # 조회 요청
+        search_btn = train_search.find_element(By.XPATH, '//img[@src="/images/btn_inq_tick.gif"]')
+        search_btn.click()
 
-    table = train_search.find_element(By.ID, "tableResult")
+        train_search.implicitly_wait(3)
 
-    trs = table.find_elements(By.TAG_NAME, "tr")
+        # 조회 결과 테이블 정보 파싱
+        # train_search.get(train_search.current_url)
+        # logger.info(f' 페이지 이동 : {train_search.current_url}' )
 
-    row_data = []
+        table = train_search.find_element(By.ID, "tableResult")
 
-    for tr in trs:
-        count = 0
-        td_objs = tr.find_elements(By.TAG_NAME, "td")
+        trs = table.find_elements(By.TAG_NAME, "tr")
 
-        for td in td_objs:
-            count += 1
+        row_data = []
 
-            # td object에는 여러가지 값들이 있어서 필요한 값이 있는 순번에만 검색하도록 수정.
-            if count in {1, 2, 7, 8, 9, 10, 11, 12, 13, 14}:
-                continue
+        for tr in trs:
+            count = 0
+            td_objs = tr.find_elements(By.TAG_NAME, "td")
 
-            if count == 3:
-                go = td.text
-                go = go.replace("\n", " ")
-                continue
+            for td in td_objs:
+                count += 1
 
-            if count == 4:
-                end = td.text
-                end = end.replace("\n", " ")
-                continue
+                # td object에는 여러가지 값들이 있어서 필요한 값이 있는 순번에만 검색하도록 수정.
+                if count in {1, 2, 7, 8, 9, 10, 11, 12, 13, 14}:
+                    continue
 
-            try:
-                # 특실
-                element = td.find_element(By.TAG_NAME, "img")
+                if count == 3:
+                    go = td.text
+                    go = go.replace("\n", " ")
+                    continue
 
-                img_name = element.get_attribute("name")
-                btn_names_special = {f"btnRsv2_{i}" for i in range(10)}
+                if count == 4:
+                    end = td.text
+                    end = end.replace("\n", " ")
+                    continue
 
-                if img_name in btn_names_special:
-                    row_data.append({
-                        "go": go,
-                        "end": end,
-                        "kind": "특실"
-                    })
+                try:
+                    # 특실
+                    element = td.find_element(By.TAG_NAME, "img")
 
-            except NoSuchElementException as err:
-                logger.info("특실 매진")
+                    img_name = element.get_attribute("name")
+                    btn_names_special = {f"btnRsv2_{i}" for i in range(10)}
 
-            try:
-                # 일반실
-                element = td.find_element(By.TAG_NAME, "img")
+                    if img_name in btn_names_special:
+                        row_data.append({
+                            "go": go,
+                            "end": end,
+                            "kind": "특실"
+                        })
 
-                img_name = element.get_attribute("name")
-                btn_names_special = {f"btnRsv1_{i}" for i in range(10)}
+                except NoSuchElementException as err:
+                    logger.info("특실 매진")
 
-                if img_name in btn_names_special:
-                    row_data.append({
-                        "go": go,
-                        "end": end,
-                        "kind": "일반"
-                    })
+                try:
+                    # 일반실
+                    element = td.find_element(By.TAG_NAME, "img")
 
-            except NoSuchElementException as err:
-                logger.info("일반실 매진")
+                    img_name = element.get_attribute("name")
+                    btn_names_special = {f"btnRsv1_{i}" for i in range(10)}
 
-    logger.info(row_data)
+                    if img_name in btn_names_special:
+                        row_data.append({
+                            "go": go,
+                            "end": end,
+                            "kind": "일반"
+                        })
+
+                except NoSuchElementException as err:
+                    logger.info("일반실 매진")
+
+        logger.info(row_data)
+
+    except Exception as err:
+        train_search_url = "https://www.letskorail.com/ebizprd/EbizPrdTicketpr21100W_pr21110.do"
+
+        train_search = get_web_site_crawling(url=train_search_url)
+
+        # 페이지의 모든 엘리먼트 가져오기
+        elements = train_search.find_elements(By.XPATH, '//img')
+
+        # 모든 엘리먼트 로그로 출력
+        for element in elements:
+            logging.info(f" Element: {element.tag_name} - Text: {element.text} , {element.get_attribute('outerHTML')} ")
+
+        reservation_btn = train_search.find_element(By.XPATH, '//img[@src="/images/lnb_mu01_01.gif"]')
+        reservation_btn.click()
+
+        # 승차권 예매 페이지 이동 후 driver 초기화
+        logger.info(f' 페이지 이동 : {train_search.current_url}')
+        train_search.get(train_search.current_url)
+
+        start_station = train_search.find_element(By.ID, "start")
+        arrival_station = train_search.find_element(By.ID, "get")
+
+        month = train_search.find_element(By.ID, "s_month")
+        day = train_search.find_element(By.ID, "s_day")
+        hour = train_search.find_element(By.ID, "s_hour")
+        members = train_search.find_element(By.ID, "peop01")
+
+        # 초기화
+        start_station.clear()
+        arrival_station.clear()
+
+        # 사용자 요청 값으로 세팅
+        start_station.send_keys(req_startingPoint)
+        arrival_station.send_keys(req_arrivalPoint)
+        month.send_keys(req_month)
+        day.send_keys(req_day)
+
+        hourSelect = Select(hour)
+        hourSelect.select_by_value(req_hour)
+
+        # 사용자 요청 수 대로 선택
+        memberSelect = Select(members)
+        memberSelect.select_by_value(req_memberNum)
+
+        # 요청 차종 선택
+        if req_trainType == "ktx":
+            train_btn = train_search.find_element(By.ID, "selGoTrainRa00")
+            train_btn.click()
+
+        # 조회 요청
+        search_btn = train_search.find_element(By.XPATH, '//img[@src="/images/btn_inq_tick.gif"]')
+        search_btn.click()
+
+        train_search.implicitly_wait(3)
+
+        # 조회 결과 테이블 정보 파싱
+        # train_search.get(train_search.current_url)
+        # logger.info(f' 페이지 이동 : {train_search.current_url}' )
+
+        table = train_search.find_element(By.ID, "tableResult")
+
+        trs = table.find_elements(By.TAG_NAME, "tr")
+
+        row_data = []
+
+        for tr in trs:
+            count = 0
+            td_objs = tr.find_elements(By.TAG_NAME, "td")
+
+            for td in td_objs:
+                count += 1
+
+                # td object에는 여러가지 값들이 있어서 필요한 값이 있는 순번에만 검색하도록 수정.
+                if count in {1, 2, 7, 8, 9, 10, 11, 12, 13, 14}:
+                    continue
+
+                if count == 3:
+                    go = td.text
+                    go = go.replace("\n", " ")
+                    continue
+
+                if count == 4:
+                    end = td.text
+                    end = end.replace("\n", " ")
+                    continue
+
+                try:
+                    # 특실
+                    element = td.find_element(By.TAG_NAME, "img")
+
+                    img_name = element.get_attribute("name")
+                    btn_names_special = {f"btnRsv2_{i}" for i in range(10)}
+
+                    if img_name in btn_names_special:
+                        row_data.append({
+                            "go": go,
+                            "end": end,
+                            "kind": "특실"
+                        })
+
+                except NoSuchElementException as err:
+                    logger.info("특실 매진")
+
+                try:
+                    # 일반실
+                    element = td.find_element(By.TAG_NAME, "img")
+
+                    img_name = element.get_attribute("name")
+                    btn_names_special = {f"btnRsv1_{i}" for i in range(10)}
+
+                    if img_name in btn_names_special:
+                        row_data.append({
+                            "go": go,
+                            "end": end,
+                            "kind": "일반"
+                        })
+
+                except NoSuchElementException as err:
+                    logger.info("일반실 매진")
+
+        logger.info(row_data)
+
+
 
     return row_data
 
