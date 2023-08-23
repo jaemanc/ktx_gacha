@@ -188,6 +188,22 @@ def reservation_loop(reservation_model, url, index):
                         if (going - current_time) >= timedelta(minutes=20):
                             element.click()  # 예약하기
 
+                            # 안내 메시지 처리.
+                            try:
+                                iframe = reserve_driver.find_element(By.TAG_NAME, 'iframe')
+                                reserve_driver.switch_to.frame(iframe)
+
+                                element = reserve_driver.find_element(By.XPATH, '//a[@class="btn_blue_ang"]')
+
+                                if element:
+                                    element.click()
+
+                                # iframe에서 빠져나옴
+                                reserve_driver.switch_to.default_content()
+
+                            except Exception as err:
+                                logger.info(f' 계속 진행. ')
+
                             logger.info(f' 특실 예약합니다. {go}')
 
                             while True:
@@ -226,6 +242,22 @@ def reservation_loop(reservation_model, url, index):
 
                         if (going - current_time) >= timedelta(minutes=20):
                             element.click()  # 예약하기
+
+                            # 안내 메시지 처리.
+                            try:
+                                iframe = reserve_driver.find_element(By.TAG_NAME,'iframe')
+                                reserve_driver.switch_to.frame(iframe)
+
+                                element = reserve_driver.find_element(By.XPATH, '//a[@class="btn_blue_ang"]')
+
+                                if element:
+                                    element.click()
+
+                                # iframe에서 빠져나옴
+                                reserve_driver.switch_to.default_content()
+
+                            except Exception as err:
+                                logger.info(f' 계속 진행. ')
 
                             logger.info(f' 일반실 예약합니다. {go}')
 
