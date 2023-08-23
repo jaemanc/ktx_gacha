@@ -58,7 +58,7 @@ $ docker ps -all
 $ docker restart 
 
 ### log 조회 ( container id )
-$ docker logs d14d5e9afaf1
+$ docker logs -f d14d5e9afaf1
 
 ### docker ps 종료 
 $ sudo docker rm -f $(docker ps -qa)

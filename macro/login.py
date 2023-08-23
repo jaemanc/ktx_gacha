@@ -50,14 +50,11 @@ def login(request):
     logger.info(f' login page : {login_page.__dict__}')
 
     # 페이지의 모든 엘리먼트 가져오기
-    elements = login_page.find_elements(By.XPATH, '//*')
+    elements = login_page.find_elements(By.XPATH, '//img')
 
     # 모든 엘리먼트 로그로 출력
     for element in elements:
-        logging.debug(f'Element: {element.tag_name} - Text: {element.text}')
-
-
-
+        logging.info(f" Element: {element.tag_name} - Text: {element.text} , {element.get_attribute('outerHTML')} ")
 
 
     # 로그인 페이지 이동.
