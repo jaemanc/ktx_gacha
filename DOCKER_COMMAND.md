@@ -70,7 +70,10 @@ $ groups $계정명 -> <br>  sudo groupadd docker. ->
 <br> 재연결 이후에도 에러 일 경우 파일 그룹 지정 ( $ sudo chown root:docker /var/run/docker.sock ) -> 
 <br> 실행 권한 변경 $ sudo chmod 666 /var/run/docker.sock
 
+### Chrome 접속 관련 국가 설정 
+$ timedatectl <br>
 
+$ sudo timedatectl set-timezone Asia/Seoul
 
 
 
