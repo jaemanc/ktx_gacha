@@ -1,4 +1,6 @@
 import logging
+import traceback
+
 import requests
 
 from selenium import webdriver
@@ -7,6 +9,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 
 logger = logging.getLogger()
+log_selenium = logging.getLogger('selenium')
 
 # customService = Service(ChromeDriverManager().install())
 customOptions = Options()
@@ -43,6 +46,9 @@ def get_web_site_crawling(**kwargs):
         return driver
 
     except Exception as err:
+        log_selenium.info(f'{traceback.format_exc()}')
+        log_selenium.info(f'{err}')
+
         # URL 요청 없을경우
         # 기존 driver의 정보를 그대로 리턴한다.
         return driver

@@ -8,6 +8,7 @@ from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 
 logger = logging.getLogger()
+log_selenium = logging.getLogger('selenium')
 
 
 class Login(viewsets.GenericViewSet, mixins.ListModelMixin, View):
@@ -32,8 +33,10 @@ class Login(viewsets.GenericViewSet, mixins.ListModelMixin, View):
         except Exception as err:
             logger.debug(f'v1/login error: {traceback.format_exc()}')
             logger.debug(f'{err}')
-            return Response(data=request.data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+            log_selenium.debug(f' se v1/login error: {traceback.format_exc()}')
+            log_selenium.debug(f' se {err}')
+            return Response(data=request.data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 def login(request):
 
