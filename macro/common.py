@@ -14,7 +14,7 @@ log_selenium = logging.getLogger('selenium')
 # customService = Service(ChromeDriverManager().install())
 customOptions = Options()
 customOptions.add_argument("--disable-extensions")
-# customOptions.add_argument('--headless=new')
+customOptions.add_argument('--headless=new')
 customOptions.add_argument('--no-sandbox')
 customOptions.add_argument('--lang=ko-KR')
 
