@@ -11,7 +11,7 @@ logger = logging.getLogger()
 log_selenium = logging.getLogger('selenium')
 
 
-class Login(viewsets.GenericViewSet, mixins.ListModelMixin, View):
+class ChatBotLogin(viewsets.GenericViewSet, mixins.ListModelMixin, View):
 
     def login_to_website(self, request):
         """
@@ -20,7 +20,7 @@ class Login(viewsets.GenericViewSet, mixins.ListModelMixin, View):
             "password": "패스워드"
         }
         """
-        logger.debug(f'url : v1/login')
+        logger.debug(f'url : v1/chatbot-login')
         logger.debug(f'method: POST')
         logger.debug(f'request_data: {request.data}')
 
@@ -31,19 +31,28 @@ class Login(viewsets.GenericViewSet, mixins.ListModelMixin, View):
             return Response(data=request.data, status=status.HTTP_200_OK)
 
         except Exception as err:
-            logger.debug(f'v1/login error: {traceback.format_exc()}')
+            logger.debug(f'v1/chatbot-login error: {traceback.format_exc()}')
             logger.debug(f'{err}')
 
-            log_selenium.debug(f' se v1/login error: {traceback.format_exc()}')
-            log_selenium.debug(f' se {err}')
             return Response(data=request.data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 def login(request):
 
     # login_web_site_url = "https://www.letskorail.com"
+    data = request.data
+    bot_id = data['bot']['id']
+    intent_id = data['intent']['id']
 
-    req_membershipNum = request.data['membershipNum']
-    req_password = request.data['password']
+    loginentity_origin = data['action']['detailParams']['loginEntityParams']['origin']
+    values = loginentity_origin.split('/')
+    membershipNum = values[0].strip()
+    password = values[1].strip()
+
+    logger.info(f'bot_id : {bot_id}')
+    logger.info(f'intent_id : {intent_id}')
+    logger.info(f'loginentity_origin : {loginentity_origin} , membershipNum : {membershipNum} , password : {password}')
+    req_membershipNum = membershipNum
+    req_password = password
 
     login_page = None
 
@@ -71,3 +80,7 @@ def login(request):
         login_btn.click()
 
     return login_page
+
+
+
+
