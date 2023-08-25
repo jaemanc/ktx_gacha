@@ -26,4 +26,6 @@ class Chatbot(viewsets.GenericViewSet, mixins.ListModelMixin, View):
         print("Version:", version)
         print("Text:", text)
 
+        logger.info(f' request data : {request.data}')
+
         return Response(data=json_obj, status=status.HTTP_200_OK)
