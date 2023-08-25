@@ -105,8 +105,17 @@ def login(request):
                 password = login_page.find_element(By.NAME, "txtPwd")
                 password.send_keys(req_password)
 
-        login_btn = login_page.find_element(By.XPATH, '//img[@src="/images/btn_login.gif"]')
+        try:
+            login_btn = login_page.find_element(By.XPATH, '//img[@src="/images/btn_login.gif"]')
+        except Exception as err:
+            try:
+                login_btn = login_page.find_element(By.XPATH, 'a[href="javascript:Login(1);"]')
+            except Exception as err2:
+                login_btn = login_page.find_element(By.XPATH, 'li.btn_login')
+
         login_btn.click()
+
+        # href 속성 값으로 엘리먼트 찾기
 
     return login_page
 
