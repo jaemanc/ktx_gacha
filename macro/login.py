@@ -58,8 +58,7 @@ def login(request):
 
         logger.info(f' retried.. go! {login_web_site_url}, driver session id :  {login_page.session_id}')
     finally:
-
-        login_page.implicitly_wait(5)
+        login_page.implicitly_wait(3)
 
         # 로그인 페이지 이동.
         try:
@@ -69,11 +68,25 @@ def login(request):
             go_to_login_page_button = login_page.find_elements(By.XPATH, '//img[@src="/images/gnb_home.gif"]')
             go_to_login_page_button[0].click()
 
-        member_numbs = login_page.find_element(By.ID, "txtMember")
-        member_numbs.send_keys(req_membershipNum)
+        login_page.implicitly_wait(3)
 
-        password = login_page.find_element(By.ID, "txtPwd")
-        password.send_keys(req_password)
+        member_numbs = None
+        password = None
+
+        try:
+            member_numbs = login_page.find_element(By.ID, "txtMember")
+            member_numbs.send_keys(req_membershipNum)
+
+            password = login_page.find_element(By.ID, "txtPwd")
+            password.send_keys(req_password)
+        except Exception as err:
+            if member_numbs:
+                member_numbs = login_page.find_element(By.NAME, "txtMember")
+                member_numbs.send_keys(req_membershipNum)
+            if password:
+                password = login_page.find_element(By.NAME, "txtPwd")
+                password.send_keys(req_password)
+
         login_btn = login_page.find_element(By.XPATH, '//img[@src="/images/btn_login.gif"]')
         login_btn.click()
 
