@@ -69,15 +69,13 @@ def login(request):
     finally:
         login_page.implicitly_wait(5)
 
-        # elements = login_page.find_elements(By.XPATH, '//img')
-        #
-        # # 모든 엘리먼트 로그로 출력
-        # for element in elements:
-        #     logging.info(f" Element: {element.tag_name} - Text: {element.text} , {element.get_attribute('outerHTML')} ")
-
         # 로그인 페이지 이동.
-        go_to_login_page_button = login_page.find_elements(By.XPATH, '//img[@src="/images/gnb_login.gif"]')
-        go_to_login_page_button[0].click()
+        try:
+            go_to_login_page_button = login_page.find_elements(By.XPATH, '//img[@src="/images/gnb_login.gif"]')
+            go_to_login_page_button[0].click()
+        except Exception as err:
+            go_to_login_page_button = login_page.find_elements(By.XPATH, '//img[@src="/images/gnb_home.gif"]')
+            go_to_login_page_button[0].click()
 
         member_numbs = login_page.find_element(By.ID, "txtMember")
         member_numbs.send_keys(req_membershipNum)
