@@ -18,9 +18,11 @@ import macro.common
 logger = logging.getLogger()
 custom_options = Options()
 
+custom_options.add_argument("--disable-extensions")
 custom_options.add_argument('--headless=new')
 custom_options.add_argument('--no-sandbox')
 custom_options.add_argument('--lang=ko-KR')
+custom_options.add_argument('--disable-dev-shm-usage')
 driver = None
 
 def webdriver_exception_handler():
