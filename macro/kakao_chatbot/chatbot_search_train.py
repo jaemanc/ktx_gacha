@@ -1,3 +1,4 @@
+import json
 import logging
 import traceback
 
@@ -31,7 +32,7 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
                 row_data = get_train_list_chatbot(request)
                 return Response(data=row_data, status=status.HTTP_200_OK)
             else:
-                return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
+                return Response(data="요청날짜를 다시 확인 해주세요.", status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as err:
             logger.debug(f'v1/train error: {traceback.format_exc()}')
@@ -40,7 +41,16 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
             return Response(data=None, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 def is_valid_date_chatbot(request):
-    req_date = request.data.get("date", "1993-07-17 01")
+
+    data = request.data
+    origin_value = data["action"]["detailParams"]["TrainList"]["origin"]
+    parts = origin_value.split(" / ")
+
+    date_time = parts[2]  # 일시
+
+    logger.info(date_time)
+
+    req_date = date_time
     # 주어진 날짜와 시간을 datetime 객체로 변환
     requested_time = datetime.strptime(req_date, "%Y-%m-%d %H")
 
@@ -52,12 +62,11 @@ def is_valid_date_chatbot(request):
         logger.info(f' requested_time : {requested_time}... why..? ')
         return False
     else:
-        return
+        return True
 
 def get_train_list_chatbot(request):
     data = request.data
-    bot_id = data['bot']['id']
-    TrainListEntity = data['action']['detailParams']['TrainListEntity']['origin']
+    TrainListEntity = data["action"]["detailParams"]["TrainList"]["origin"]
 
     """
         starting_point : 용산
@@ -65,23 +74,28 @@ def get_train_list_chatbot(request):
         date_time : 2023-08-25 01
         member_num : 1
         train_type : ktx
-        contact_email : jaemanc93@gmail.com
-        seat_type : 일반
     """
+    parts = TrainListEntity.split(" / ")
+
+    starting_point = parts[0]  # 출발역
+    arrival_point = parts[1]  # 도착역
+    date_time = parts[2]  # 일시
+    member_num = parts[3]  # 인원 수
+    train_type = parts[4]  # 열차 종류
 
     logger.info(f' TrainListEntity : {TrainListEntity} ')
 
-    req_startingPoint = request.query_params.get("startingPoint", "용산")
-    req_arrivalPoint = request.query_params.get("arrivalPoint", "익산")
-    req_date = request.query_params.get("date", "1993-07-17 01")
+    req_startingPoint = starting_point
+    req_arrivalPoint = arrival_point
+    req_date = date_time
 
     req_year = req_date[:4]
     req_month = req_date[5:7]
     req_day = req_date[8:10]
     req_hour = req_date[11:13] # 00~ 23 까지
 
-    req_memberNum = request.query_params.get("memberNum", "1")
-    req_trainType = request.query_params.get("trainType", "ktx")
+    req_memberNum = member_num
+    req_trainType = train_type
 
     # 조회 로직 리팩토링
     try:
