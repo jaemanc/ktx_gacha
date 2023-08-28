@@ -61,51 +61,41 @@ def login(request):
     login_page = None
 
     try:
-        login_web_site_url = "https://www.letskorail.com/ebizprd/prdMain.do"
-        login_page = get_web_site_crawling(url=login_web_site_url)
-
-        logger.info(f'driver session id :  {login_page.session_id}')
+        login_page = get_web_site_crawling(url="https://www.letskorail.com/ebizprd/prdMain.do")
+        logger.info(f'driver session id: {login_page.session_id}')
     except Exception as err:
-        login_web_site_url = "https://www.letskorail.com"
-        login_page = get_web_site_crawling(url=login_web_site_url)
+        login_page = get_web_site_crawling(url="https://www.letskorail.com")
+        logger.info(f'retried.. go! {login_page.current_url}, driver session id: {login_page.session_id}')
 
-        logger.info(f' retried.. go! {login_web_site_url}, driver session id :  {login_page.session_id}')
     finally:
         login_page.implicitly_wait(3)
 
         # 로그인 페이지 이동.
         try:
-            go_to_login_page_button = login_page.find_elements(By.XPATH, '//img[@src="/images/gnb_login.gif"]')
-            go_to_login_page_button[0].click()
-        except Exception as err:
-            go_to_login_page_button = login_page.find_elements(By.XPATH, '//img[@src="/images/gnb_home.gif"]')
-            go_to_login_page_button[0].click()
+            go_to_login_page_button = login_page.find_element(By.XPATH, '//img[@src="/images/gnb_login.gif"]')
+        except NoSuchElementException:
+            go_to_login_page_button = login_page.find_element(By.XPATH, '//img[@src="/images/gnb_home.gif"]')
+
+        go_to_login_page_button.click()
 
         login_page.implicitly_wait(3)
 
         member_numbs = None
         password = None
 
-        try:
-            member_numbs = login_page.find_element(By.ID, "txtMember")
-            member_numbs.send_keys(req_membershipNum)
+        member_num_input = login_page.find_element(By.NAME, "txtMember")
+        password_input = login_page.find_element(By.NAME, "txtPwd")
 
-            password = login_page.find_element(By.ID, "txtPwd")
-            password.send_keys(req_password)
-        except Exception as err:
-            if member_numbs:
-                member_numbs = login_page.find_element(By.NAME, "txtMember")
-                member_numbs.send_keys(req_membershipNum)
-            if password:
-                password = login_page.find_element(By.NAME, "txtPwd")
-                password.send_keys(req_password)
+        member_num_input.send_keys(membershipNum)
+        password_input.send_keys(password)
 
         try:
             login_btn = login_page.find_element(By.XPATH, '//img[@src="/images/btn_login.gif"]')
-        except NoSuchElementException as err:
-            login_btn = login_page.find_element(By.XPATH, 'a[href="javascript:Login(1);"]')
-        except Exception as err2:
-            login_btn = login_page.find_element(By.XPATH, 'li.btn_login')
+        except NoSuchElementException:
+            try:
+                login_btn = login_page.find_element(By.XPATH, 'a[href="javascript:Login(1);"]')
+            except NoSuchElementException:
+                login_btn = login_page.find_element(By.XPATH, 'li.btn_login')
 
         login_btn.click()
 
