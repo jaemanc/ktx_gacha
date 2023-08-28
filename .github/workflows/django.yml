@@ -55,4 +55,8 @@ jobs:
                 sudo docker rm -f $(docker ps -qa)
             fi
             sudo docker pull ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKER_REPO}}
-            sudo docker run -d --name ktx-gacha-for-ubuntu -e SECRET_KEY="${{secrets.SECRET_KEY}}" -p 8000:8000 ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKER_REPO}}
+            sudo docker run -d --name ktx-gacha-for-ubuntu 
+            \ -e SECRET_KEY="${{secrets.SECRET_KEY}}" 
+            \ -e GMAIL_SENDER="${{secrets.GMAIL_SENDER}}"
+            \ -e EMAIL_PASSWORD="${{secrets.EMAIL_PASSWORD}}"
+            \-p 8000:8000 ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKER_REPO}}

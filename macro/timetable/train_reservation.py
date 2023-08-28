@@ -12,6 +12,7 @@ from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 
 from macro.timetable.models.reservation_model import ReservationModel
+from macro.utils.email_sender import send_stmp
 from macro.utils.exception_handle import webdriver_exception_handler
 
 logger = logging.getLogger()
@@ -40,7 +41,7 @@ class TrainReservation(viewsets.GenericViewSet, mixins.ListModelMixin, View):
             webdriver_exception_handler()
             return Response(data=None, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(data=None, status=status.HTTP_200_OK)
+        return Response(data='예약 완료!', status=status.HTTP_200_OK)
 
 
 def is_valid_request(request):
@@ -201,8 +202,6 @@ def reservation_loop(reservation_model, url, index):
                             except Exception as err:
                                 logger.info(f' 계속 진행. ')
 
-                            logger.info(f' 특실 예약합니다. {go}')
-
                             while True:
                                 try:
                                     # alert 창 확인 처리.
@@ -210,6 +209,12 @@ def reservation_loop(reservation_model, url, index):
                                     alert.accept()
                                 except:
                                     break
+
+                            reservation_model.go = go
+                            logger.info(f' 특실 예약합니다. {go} , {reservation_model}')
+
+                            # 예매 정보 이메일로 통보
+                            send_stmp(reservation_model)
 
                             # 장바구니에 담았으면?
                             return True
@@ -256,8 +261,6 @@ def reservation_loop(reservation_model, url, index):
                             except Exception as err:
                                 logger.info(f' 계속 진행. ')
 
-                            logger.info(f' 일반실 예약합니다. {go}')
-
                             while True:
                                 try:
                                     # alert 창 확인 처리.
@@ -265,6 +268,13 @@ def reservation_loop(reservation_model, url, index):
                                     alert.accept()
                                 except:
                                     break
+
+                            # 선택한 출발 시간 세팅
+                            reservation_model.go = go
+                            logger.info(f' 일반실 예약합니다. {go} , {reservation_model}')
+
+                            # 예매 정보 이메일로 통보
+                            send_stmp(reservation_model)
 
                             # 장바구니에 담았으면?
                             return True

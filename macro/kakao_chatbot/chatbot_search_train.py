@@ -1,34 +1,34 @@
 import logging
-import time
 import traceback
 
 from django.views import View
-from selenium.common import NoSuchElementException, UnexpectedAlertPresentException
+from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support.wait import WebDriverWait
+
 from macro.common import get_web_site_crawling
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 from datetime import datetime
-from selenium.webdriver.support.ui import WebDriverWait
+
 from macro.utils.exception_handle import webdriver_exception_handler
 from selenium.webdriver.support import expected_conditions as EC
 
+
 logger = logging.getLogger()
 
+class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
 
-class Train(viewsets.GenericViewSet, mixins.ListModelMixin, View):
-
-    # 목록 조회
     def get_train(self, request):
-        logger.debug(f'url : v1/train')
-        logger.debug(f'method: GET')
+        logger.debug(f'url : v1/chatbot-train')
+        logger.debug(f'method: POST')
         logger.debug(f'request_data: {request.data}')
 
         try:
             # 오늘 날짜 이전 데이터 조회 방어
-            if is_valid_date(request):
-                row_data = get_train_list(request)
+            if is_valid_date_chatbot(request):
+                row_data = get_train_list_chatbot(request)
                 return Response(data=row_data, status=status.HTTP_200_OK)
             else:
                 return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
@@ -39,9 +39,8 @@ class Train(viewsets.GenericViewSet, mixins.ListModelMixin, View):
             webdriver_exception_handler()
             return Response(data=None, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-def is_valid_date(request):
-    req_date = request.query_params.get("date", "1993-07-17 01")
+def is_valid_date_chatbot(request):
+    req_date = request.data.get("date", "1993-07-17 01")
     # 주어진 날짜와 시간을 datetime 객체로 변환
     requested_time = datetime.strptime(req_date, "%Y-%m-%d %H")
 
@@ -53,10 +52,25 @@ def is_valid_date(request):
         logger.info(f' requested_time : {requested_time}... why..? ')
         return False
     else:
-        return True
+        return
 
+def get_train_list_chatbot(request):
+    data = request.data
+    bot_id = data['bot']['id']
+    TrainListEntity = data['action']['detailParams']['TrainListEntity']['origin']
 
-def get_train_list(request):
+    """
+        starting_point : 용산
+        arrival_point : 익산
+        date_time : 2023-08-25 01
+        member_num : 1
+        train_type : ktx
+        contact_email : jaemanc93@gmail.com
+        seat_type : 일반
+    """
+
+    logger.info(f' TrainListEntity : {TrainListEntity} ')
+
     req_startingPoint = request.query_params.get("startingPoint", "용산")
     req_arrivalPoint = request.query_params.get("arrivalPoint", "익산")
     req_date = request.query_params.get("date", "1993-07-17 01")
@@ -64,13 +78,12 @@ def get_train_list(request):
     req_year = req_date[:4]
     req_month = req_date[5:7]
     req_day = req_date[8:10]
-    req_hour = req_date[11:13]  # 00~ 23 까지
+    req_hour = req_date[11:13] # 00~ 23 까지
 
     req_memberNum = request.query_params.get("memberNum", "1")
     req_trainType = request.query_params.get("trainType", "ktx")
 
     # 조회 로직 리팩토링
-
     try:
         train_search_url = "https://www.letskorail.com/index.jsp"
         train_search = get_web_site_crawling(url=train_search_url)
@@ -83,6 +96,7 @@ def get_train_list(request):
 
         reservation_btn = train_search.find_element(By.XPATH, '//img[@src="/images/lnb_mu01_01.gif"]')
         reservation_btn.click()
+
 
     # 승차권 예매 페이지 이동 후 driver 초기화
     logger.info(f' 페이지 이동 : {train_search.current_url}')
