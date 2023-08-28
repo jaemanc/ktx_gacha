@@ -80,14 +80,11 @@ def login(request):
 
         login_page.implicitly_wait(3)
 
-        member_numbs = None
-        password = None
+        member_numbs = login_page.find_element(By.ID, "txtMember")
+        member_numbs.send_keys(req_membershipNum)
 
-        member_num_input = login_page.find_element(By.NAME, "txtMember")
-        password_input = login_page.find_element(By.NAME, "txtPwd")
-
-        member_num_input.send_keys(membershipNum)
-        password_input.send_keys(password)
+        password = login_page.find_element(By.ID, "txtPwd")
+        password.send_keys(req_password)
 
         try:
             login_btn = login_page.find_element(By.XPATH, '//img[@src="/images/btn_login.gif"]')
