@@ -2,6 +2,7 @@ import logging
 import traceback
 
 from django.views import View
+from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 from macro.common import get_web_site_crawling
 from rest_framework import status, viewsets, mixins
@@ -105,13 +106,19 @@ def login(request):
                 password = login_page.find_element(By.NAME, "txtPwd")
                 password.send_keys(req_password)
 
+        # 진짜 방법 없다 모든 버튼 다 찾는 수밖에 ;;
+        elements = login_page.find_elements(By.XPATH, '//img')
+
+        # 모든 엘리먼트 로그로 출력
+        for element in elements:
+            logging.info(f" Element: {element.tag_name} - Text: {element.text} , {element.get_attribute('outerHTML')} ")
+
         try:
             login_btn = login_page.find_element(By.XPATH, '//img[@src="/images/btn_login.gif"]')
-        except Exception as err:
-            try:
-                login_btn = login_page.find_element(By.XPATH, 'a[href="javascript:Login(1);"]')
-            except Exception as err2:
-                login_btn = login_page.find_element(By.XPATH, 'li.btn_login')
+        except NoSuchElementException as err:
+            login_btn = login_page.find_element(By.XPATH, 'a[href="javascript:Login(1);"]')
+        except Exception as err2:
+            login_btn = login_page.find_element(By.XPATH, 'li.btn_login')
 
         login_btn.click()
 
