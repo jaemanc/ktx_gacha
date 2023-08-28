@@ -1,16 +1,8 @@
 import logging
-import http.client
-import logging
 import traceback
 
-import requests
-from rest_framework import status
-
 from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from rest_framework.views import exception_handler
 
 from macro.common import get_web_site_crawling
 import macro.common

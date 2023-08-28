@@ -13,3 +13,5 @@ class ReservationModel:
     month = ""
     day = ""
     hour = ""
+    # 예약 시, 출발 일시.
+    go = ""
