@@ -2,7 +2,6 @@ from macro.timetable.train_reservation import TrainReservation
 
 from django.urls import path
 
-from macro.login import Login
 from macro.timetable.search_train import Train
 
 urlpatterns = [

@@ -10,6 +10,8 @@ from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 from datetime import datetime
 
+from macro.utils.exception_handle import webdriver_exception_handler
+
 logger = logging.getLogger()
 
 
@@ -32,6 +34,7 @@ class Train(viewsets.GenericViewSet, mixins.ListModelMixin, View):
         except Exception as err:
             logger.debug(f'v1/train error: {traceback.format_exc()}')
             logger.debug(f'get train list error:  {err}')
+            webdriver_exception_handler()
             return Response(data=None, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

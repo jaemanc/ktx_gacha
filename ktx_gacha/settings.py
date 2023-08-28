@@ -104,15 +104,21 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ko-kr'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 
 USE_L10N = True
 
 USE_TZ = True
+
+# rest_framework 와 selenium 익셉션 핸들러가 분리되어있어서
+# 실효성이 있는 익셉션 핸들러는 아님
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'macro.utils.exception_handle.custom_exception_handler'
+}
 
 
 # Static files (CSS, JavaScript, Images)
