@@ -19,11 +19,13 @@ jobs:
   docker-login:
     needs: [build]
     runs-on: ubuntu-latest
-    uses: docker/login-action@v1
-    with:
-      registry: ghcr.io
-      username: ${{secrets.DOCKERHUB_USERNAME}}
-      password: ${{secrets.DOCKERHUB_ACCESS_TOKEN}}
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{secrets.DOCKERHUB_USERNAME}}
+          password: ${{secrets.DOCKERHUB_ACCESS_TOKEN}}
   build-and-push:
     needs: [docker-login]
     runs-on: ubuntu-latest
@@ -39,7 +41,7 @@ jobs:
             git reset --hard origin/main
             git pull origin main
             sudo docker build -t ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKER_REPO}} .
-            sudo docker push ${{secrets.DOCKERHUB_USERNAME}}/ktx-gacha-for-ubuntu
+            sudo docker push ${{secrets.가DOCKERHUB_USERNAME}}/ktx-gacha-for-ubuntu
   deploy :
     needs: [build-and-push]
     runs-on: ubuntu-latest
