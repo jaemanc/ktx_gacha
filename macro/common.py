@@ -12,15 +12,15 @@ logger = logging.getLogger()
 log_selenium = logging.getLogger('selenium')
 
 # customService = Service(ChromeDriverManager().install())
-customOptions = Options()
-customOptions.add_argument("--disable-extensions")
-customOptions.add_argument('--headless=new')
-customOptions.add_argument('--no-sandbox')
-customOptions.add_argument('--lang=ko-KR')
+custom_options = Options()
+# custom_options.add_argument("--disable-extensions")
+custom_options.add_argument('--headless=new')
+custom_options.add_argument('--no-sandbox')
+custom_options.add_argument('--lang=ko-KR')
 
 # 연속성을 위해 전역으로 세팅
 # 성능 향상을 위해 쓰지 않는 옵션은 끄는게 좋지만 그렇게 큰 차이가 나지 않음.
-driver = webdriver.Chrome(options=customOptions)
+driver = webdriver.Chrome(options=custom_options)
 
 driver.execute_script("window.open('');")
 
@@ -28,8 +28,8 @@ s = requests.session()
 
 logger.info(f'driver session id :  {driver.session_id}')
 
-def get_web_site_crawling(**kwargs):
 
+def get_web_site_crawling(**kwargs):
     global driver
 
     # 로컬 환경 버전이 아닌 드라이버 버전에 맞는 객체를 설치하고 가져오도록 수정.
@@ -37,9 +37,11 @@ def get_web_site_crawling(**kwargs):
     try:
         url = kwargs['url']
         # 웹사이트 URL 설정
-        website_url = url  # 대상 웹사이트 URL
-        driver.get(website_url)
-
+        if url:
+            driver.get(url)
+        elif driver.get(driver.current_url) is None:
+            new_driver = webdriver.Chrome(options=custom_options)
+            return new_driver.get('https://www.letskorail.com/ebizprd/prdMain.do')
 
         alert = driver.switch_to.alert
         alert.dismiss()
