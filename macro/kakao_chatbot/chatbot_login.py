@@ -86,13 +86,11 @@ def login(request):
         member_numbs = None
         password = None
 
+        elements = login_page.find_elements(By.XPATH, '//img')
 
-
-        # elements = login_page.find_elements(By.XPATH, '//img')
-        #
-        # # 모든 엘리먼트 로그로 출력
-        # for element in elements:
-        #     logging.info(f" Element: {element.tag_name} - Text: {element.text} , {element.get_attribute('outerHTML')} ")
+        # 모든 엘리먼트 로그로 출력
+        for element in elements:
+            logging.info(f" Element: {element.tag_name} - Text: {element.text} , {element.get_attribute('outerHTML')} ")
 
 
         try:
@@ -109,12 +107,11 @@ def login(request):
                 password = login_page.find_element(By.NAME, "txtPwd")
                 password.send_keys(req_password)
 
-        # 진짜 방법 없다 모든 버튼 다 찾는 수밖에 ;;
-        elements = login_page.find_elements(By.XPATH, '//img')
-
-        # 모든 엘리먼트 로그로 출력
-        for element in elements:
-            logging.info(f" Element: {element.tag_name} - Text: {element.text} , {element.get_attribute('outerHTML')} ")
+        # elements = login_page.find_elements(By.XPATH, '//img')
+        #
+        # # 모든 엘리먼트 로그로 출력
+        # for element in elements:
+        #     logging.info(f" Element: {element.tag_name} - Text: {element.text} , {element.get_attribute('outerHTML')} ")
 
         try:
             login_btn = login_page.find_element(By.XPATH, '//img[@src="/images/btn_login.gif"]')
