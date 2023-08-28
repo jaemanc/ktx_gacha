@@ -8,6 +8,8 @@ from macro.common import get_web_site_crawling
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 
+from macro.utils.exception_handle import webdriver_exception_handler
+
 logger = logging.getLogger()
 log_selenium = logging.getLogger('selenium')
 
@@ -34,6 +36,7 @@ class ChatBotLogin(viewsets.GenericViewSet, mixins.ListModelMixin, View):
         except Exception as err:
             logger.debug(f'v1/chatbot-login error: {traceback.format_exc()}')
             logger.debug(f'{err}')
+            webdriver_exception_handler()
 
             return Response(data=request.data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

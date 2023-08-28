@@ -1,12 +1,15 @@
+import http.client
 import logging
 import traceback
 
 import requests
+from rest_framework import status
 
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from rest_framework.views import exception_handler
 
 logger = logging.getLogger()
 log_selenium = logging.getLogger('selenium')
@@ -39,9 +42,6 @@ def get_web_site_crawling(**kwargs):
         # 웹사이트 URL 설정
         if url:
             driver.get(url)
-        elif driver.get(driver.current_url) is None:
-            new_driver = webdriver.Chrome(options=custom_options)
-            return new_driver.get('https://www.letskorail.com/ebizprd/prdMain.do')
 
         alert = driver.switch_to.alert
         alert.dismiss()
@@ -55,3 +55,5 @@ def get_web_site_crawling(**kwargs):
         # URL 요청 없을경우
         # 기존 driver의 정보를 그대로 리턴한다.
         return driver
+
+

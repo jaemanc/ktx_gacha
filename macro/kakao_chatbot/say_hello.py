@@ -1,10 +1,7 @@
 import json
 import logging
-import traceback
 
 from django.views import View
-from selenium.webdriver.common.by import By
-from macro.common import get_web_site_crawling
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 

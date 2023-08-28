@@ -4,19 +4,15 @@ import time
 import traceback
 
 from django.views import View
-from selenium.common import NoSuchElementException
-from selenium import webdriver
 from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.select import Select
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from datetime import datetime, timedelta
 from macro.common import get_web_site_crawling
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 
 from macro.timetable.models.reservation_model import ReservationModel
+from macro.utils.exception_handle import webdriver_exception_handler
 
 logger = logging.getLogger()
 
@@ -41,6 +37,7 @@ class TrainReservation(viewsets.GenericViewSet, mixins.ListModelMixin, View):
         except Exception as err:
             logger.debug(f'v1/train-reservation error: {traceback.format_exc()}')
             logger.debug(f'train-reservation error:  {err}')
+            webdriver_exception_handler()
             return Response(data=None, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(data=None, status=status.HTTP_200_OK)
