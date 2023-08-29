@@ -36,9 +36,11 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
                 get_train_thread = threading.Thread(target=get_train_list_chatbot, args=(request,))
                 get_train_thread.start()
 
-                return Response(data="매진이라면, 이메일로 알려드려요! ", status=status.HTTP_200_OK)
+                response_data = {"msg":"조회 합니다!"}
+
+                return Response(data=response_data, status=status.HTTP_200_OK)
             else:
-                return Response(data="요청날짜를 다시 확인 해주세요.", status=status.HTTP_400_BAD_REQUEST)
+                return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as err:
             logger.debug(f'v1/train error: {traceback.format_exc()}')
