@@ -1,4 +1,5 @@
 import logging
+import threading
 import traceback
 
 from django.views import View
@@ -8,6 +9,7 @@ from macro.common import get_web_site_crawling
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 
+from macro.utils.email_sender import error_sender
 from macro.utils.exception_handle import webdriver_exception_handler
 
 logger = logging.getLogger()
@@ -28,14 +30,19 @@ class ChatBotLogin(viewsets.GenericViewSet, mixins.ListModelMixin, View):
         logger.debug(f'request_data: {request.data}')
 
         try:
-            pages = login(request)
+            # 응답 우선을 위해 비동기 처리.
+            login_thread = threading.Thread(target=login, args=(request,))
+            login_thread.start()
+            # login(request)
 
-            logger.info(f" login success!! ")
             return Response(data=request.data, status=status.HTTP_200_OK)
 
         except Exception as err:
             logger.debug(f'v1/chatbot-login error: {traceback.format_exc()}')
             logger.debug(f'{err}')
+
+            # 에러 사항 이메일로 전송
+            error_sender(err)
             webdriver_exception_handler()
 
             return Response(data=request.data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -95,6 +102,8 @@ def login(request):
                 login_btn = login_page.find_element(By.XPATH, 'li.btn_login')
 
         login_btn.click()
+
+        logger.info(f" login success!! ")
 
     return login_page
 
