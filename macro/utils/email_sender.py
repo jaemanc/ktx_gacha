@@ -65,3 +65,51 @@ def send_stmp(reservation_model):
 
     # 5. 메일을 보내면 서버와의 연결 끊기
     smtp.quit()
+
+def error_sender(msg):
+    # 1. SMTP 서버 연결
+    smtp = smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT)
+
+    EMAIL_ADDR = os.environ['GMAIL_SENDER']
+    EMAIL_PASSWORD = os.environ['EMAIL_PASSWORD']
+
+    # 2. SMTP 서버에 로그인
+    smtp.login(EMAIL_ADDR, EMAIL_PASSWORD)
+
+    # 3. MIME 형태의 이메일 메세지 작성
+    message = EmailMessage()
+
+    message.set_content(msg)
+    message["Subject"] = "에러 내역입니다."
+    message["From"] = EMAIL_ADDR  # 보내는 사람의 이메일 계정
+    message["To"] = "jaemanc93@gmail.com"
+
+    # 4. 서버로 메일 보내기
+    smtp.send_message(message)
+
+    # 5. 메일을 보내면 서버와의 연결 끊기
+    smtp.quit()
+
+def train_list_sender(msg):
+    # 1. SMTP 서버 연결
+    smtp = smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT)
+
+    EMAIL_ADDR = os.environ['GMAIL_SENDER']
+    EMAIL_PASSWORD = os.environ['EMAIL_PASSWORD']
+
+    # 2. SMTP 서버에 로그인
+    smtp.login(EMAIL_ADDR, EMAIL_PASSWORD)
+
+    # 3. MIME 형태의 이메일 메세지 작성
+    message = EmailMessage()
+
+    message.set_content(msg)
+    message["Subject"] = "조회 내역입니다."
+    message["From"] = EMAIL_ADDR  # 보내는 사람의 이메일 계정
+    message["To"] = "jaemanc93@gmail.com"
+
+    # 4. 서버로 메일 보내기
+    smtp.send_message(message)
+
+    # 5. 메일을 보내면 서버와의 연결 끊기
+    smtp.quit()

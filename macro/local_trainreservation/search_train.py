@@ -1,4 +1,5 @@
 import logging
+import threading
 import traceback
 
 from django.views import View
@@ -27,8 +28,12 @@ class Train(viewsets.GenericViewSet, mixins.ListModelMixin, View):
         try:
             # 오늘 날짜 이전 데이터 조회 방어
             if is_valid_date(request):
-                row_data = get_train_list(request)
-                return Response(data=row_data, status=status.HTTP_200_OK)
+
+                get_train_thread = threading.Thread(target=get_train_list, args=(request,))
+                get_train_thread.start()
+
+                # row_data = get_train_list(request)
+                return Response(data=" 조회 결과는 이메일로..? ", status=status.HTTP_200_OK)
             else:
                 return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
 

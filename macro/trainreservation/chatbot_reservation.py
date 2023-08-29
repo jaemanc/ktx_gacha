@@ -9,7 +9,7 @@ from selenium.webdriver.common.alert import Alert
 from datetime import timedelta
 
 from macro.local_trainreservation.models.reservation_model import ReservationModel
-from macro.utils.email_sender import send_stmp
+from macro.utils.email_sender import send_stmp, error_sender
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
@@ -42,13 +42,17 @@ class ChatBotReservation(viewsets.GenericViewSet, mixins.ListModelMixin, View):
             # validation
             if is_valid_request(reservation_model=reservation_model):
 
-                train_reserve(reservation_model=reservation_model)
+                reserve_thread = threading.Thread(target=train_reserve, args=(reservation_model,))
+                reserve_thread.start()
+
+                # train_reserve(reservation_model=reservation_model)
             else:
-                return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
+                return Response(data="잘못된 요청입니다!", status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as err:
             logger.debug(f'v1/train-reservation error: {traceback.format_exc()}')
             logger.debug(f'train-reservation error:  {err}')
+            error_sender(err)
             webdriver_exception_handler()
             return Response(data=None, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

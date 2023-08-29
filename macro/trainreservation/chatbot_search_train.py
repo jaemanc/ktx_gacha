@@ -1,5 +1,6 @@
 import json
 import logging
+import threading
 import traceback
 
 from django.views import View
@@ -13,6 +14,7 @@ from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 from datetime import datetime
 
+from macro.utils.email_sender import train_list_sender
 from macro.utils.exception_handle import webdriver_exception_handler
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -29,11 +31,12 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
         try:
             # 오늘 날짜 이전 데이터 조회 방어
             if is_valid_date_chatbot(request):
-                row_data = get_train_list_chatbot(request)
-                if len(row_data) <= 0:
-                    return Response(data="다 매진이네요.. ㅜ_ㅜ",status=status.HTTP_204_NO_CONTENT)
 
-                return Response(data=row_data, status=status.HTTP_200_OK)
+                # 응답 우선을 위해 비동기 처리.
+                get_train_thread = threading.Thread(target=get_train_list_chatbot, args=(request,))
+                get_train_thread.start()
+
+                return Response(data="매진이라면, 이메일로 알려드려요! ", status=status.HTTP_200_OK)
             else:
                 return Response(data="요청날짜를 다시 확인 해주세요.", status=status.HTTP_400_BAD_REQUEST)
 
@@ -237,6 +240,8 @@ def get_train_list_chatbot(request):
             except NoSuchElementException as err:
                 logger.info("일반실 매진")
 
+    # 조회 사항 이메일로 전송
+    train_list_sender(row_data)
     logger.info(row_data)
 
     return row_data
