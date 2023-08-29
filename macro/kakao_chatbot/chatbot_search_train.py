@@ -30,6 +30,9 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
             # 오늘 날짜 이전 데이터 조회 방어
             if is_valid_date_chatbot(request):
                 row_data = get_train_list_chatbot(request)
+                if len(row_data) <= 0:
+                    return Response(data="다 매진이네요.. ㅜ_ㅜ",status=status.HTTP_204_NO_CONTENT)
+
                 return Response(data=row_data, status=status.HTTP_200_OK)
             else:
                 return Response(data="요청날짜를 다시 확인 해주세요.", status=status.HTTP_400_BAD_REQUEST)
@@ -43,7 +46,7 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
 def is_valid_date_chatbot(request):
 
     data = request.data
-    origin_value = data["action"]["detailParams"]["TrainList"]["origin"]
+    origin_value = data["action"]["detailParams"]["TrainListEntity"]["origin"]
     parts = origin_value.split(" / ")
 
     date_time = parts[2]  # 일시
@@ -66,7 +69,7 @@ def is_valid_date_chatbot(request):
 
 def get_train_list_chatbot(request):
     data = request.data
-    TrainListEntity = data["action"]["detailParams"]["TrainList"]["origin"]
+    TrainListEntity = data["action"]["detailParams"]["TrainListEntity"]["origin"]
 
     """
         starting_point : 용산
@@ -108,9 +111,6 @@ def get_train_list_chatbot(request):
         train_search_url = "https://www.letskorail.com/ebizprd/EbizPrdTicketpr21100W_pr21110.do"
         train_search = get_web_site_crawling(url=train_search_url)
 
-        reservation_btn = train_search.find_element(By.XPATH, '//img[@src="/images/lnb_mu01_01.gif"]')
-        reservation_btn.click()
-
 
     # 승차권 예매 페이지 이동 후 driver 초기화
     logger.info(f' 페이지 이동 : {train_search.current_url}')
@@ -136,6 +136,9 @@ def get_train_list_chatbot(request):
 
     monthSelect = Select(month)
     monthSelect.select_by_value(req_month)
+
+    daySelect = Select(day)
+    daySelect.select_by_value(req_day)
 
     hourSelect = Select(hour)
     hourSelect.select_by_value(req_hour)
