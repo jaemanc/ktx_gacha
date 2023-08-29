@@ -243,7 +243,7 @@ def get_train_list_chatbot(request):
                 logger.info("일반실 매진")
 
     # 조회 사항 이메일로 전송
-    train_list_sender(row_data)
+    train_list_sender(msg=row_data)
     logger.info(row_data)
 
     return row_data
