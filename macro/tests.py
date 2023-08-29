@@ -34,7 +34,6 @@ class MySeleniumTest(TestCase):
         smtp = smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT)
 
         EMAIL_ADDR = os.environ['GMAIL_SENDER']
-        # EMAIL_PASSWORD = 'cuejnmnuveprhwff'
         EMAIL_PASSWORD = os.environ['EMAIL_PASSWORD']
 
         # 2. SMTP 서버에 로그인
