@@ -70,7 +70,6 @@ def get_train_list(request):
     req_trainType = request.query_params.get("trainType", "ktx")
 
     # 조회 로직 리팩토링
-
     try:
         train_search_url = "https://www.letskorail.com/index.jsp"
         train_search = get_web_site_crawling(url=train_search_url)
@@ -81,8 +80,6 @@ def get_train_list(request):
         train_search_url = "https://www.letskorail.com/ebizprd/EbizPrdTicketpr21100W_pr21110.do"
         train_search = get_web_site_crawling(url=train_search_url)
 
-        reservation_btn = train_search.find_element(By.XPATH, '//img[@src="/images/lnb_mu01_01.gif"]')
-        reservation_btn.click()
 
     # 승차권 예매 페이지 이동 후 driver 초기화
     logger.info(f' 페이지 이동 : {train_search.current_url}')

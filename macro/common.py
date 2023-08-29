@@ -17,7 +17,7 @@ log_selenium = logging.getLogger('selenium')
 # customService = Service(ChromeDriverManager().install())
 custom_options = Options()
 custom_options.add_argument("--disable-extensions")
-custom_options.add_argument('--headless=new')
+# custom_options.add_argument('--headless=new')
 custom_options.add_argument('--no-sandbox')
 custom_options.add_argument('--lang=ko-KR')
 custom_options.add_argument('--disable-dev-shm-usage')
@@ -47,7 +47,7 @@ def get_web_site_crawling(**kwargs):
         alert = driver.switch_to.alert
         alert.dismiss()
 
-        return driver
+        return driver.get(driver.current_url)
 
     except Exception as err:
         log_selenium.info(f'{traceback.format_exc()}')
