@@ -8,6 +8,7 @@ djangorestframework==3.14.0
 exceptiongroup==1.1.2
 h11==0.14.0
 idna==3.4
+line-profiler==4.0.3
 outcome==1.2.0
 packaging==23.1
 PySocks==1.7.1

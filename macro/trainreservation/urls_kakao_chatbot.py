@@ -1,7 +1,7 @@
-from macro.kakao_chatbot.chatbot_login import ChatBotLogin
-from macro.kakao_chatbot.chatbot_reservation import ChatBotReservation
-from macro.kakao_chatbot.chatbot_search_train import ChatBotSearchTrain
-from macro.kakao_chatbot.say_hello import Chatbot
+from macro.trainreservation.chatbot_login import ChatBotLogin
+from macro.trainreservation.chatbot_reservation import ChatBotReservation
+from macro.trainreservation.chatbot_search_train import ChatBotSearchTrain
+from macro.trainreservation.say_hello import Chatbot
 
 from django.urls import path
 

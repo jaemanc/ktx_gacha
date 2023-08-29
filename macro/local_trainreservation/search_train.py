@@ -1,9 +1,8 @@
 import logging
-import time
 import traceback
 
 from django.views import View
-from selenium.common import NoSuchElementException, UnexpectedAlertPresentException
+from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from macro.common import get_web_site_crawling
