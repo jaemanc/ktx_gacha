@@ -170,12 +170,18 @@ def train_reserve(reservation_model):
     flag = False
     index = 0
     while time.time() < end_time and not flag:
-        # 페이지 새로 고침.
-        page_search_refresh(reservation_model=reservation_model)
 
-        for index in range(10):
-            logger.info(f"end_time : {end_time_formatted} index : {index} , reservation_model : {reservation_model.__dict__}")
-            flag = reservation_loop(reservation_model=reservation_model, url=url, index=index)
+        try:
+            # 페이지 새로 고침.
+            page_search_refresh(reservation_model=reservation_model)
+
+            for index in range(10):
+                logger.info(
+                    f"end_time : {end_time_formatted} index : {index} , reservation_model : {reservation_model.__dict__}")
+                flag = reservation_loop(reservation_model=reservation_model, url=url, index=index)
+        except Exception as err:
+            logger.debug(f'{traceback.format_exc()}')
+            logger.debug(f'{err}')
 
 
     logger.info(f' roop end...')
