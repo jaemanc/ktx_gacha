@@ -19,6 +19,6 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('macro.urls_macro')),
-    path('', include('macro.timetable.urls_timetable')),
-    path('', include('macro.kakao_chatbot.urls_kakao_chatbot')),
+    path('', include('macro.local_trainreservation.urls_timetable')),
+    path('', include('macro.trainreservation.urls_kakao_chatbot')),
 ]

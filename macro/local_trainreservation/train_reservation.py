@@ -2,46 +2,35 @@ import logging
 import threading
 import time
 import traceback
-from telnetlib import EC
 
 from django.views import View
 from selenium.webdriver.common.alert import Alert
-from datetime import datetime, timedelta
-
-from macro.timetable.models.reservation_model import ReservationModel
-from macro.utils.email_sender import send_stmp
-
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.support.wait import WebDriverWait
-
+from datetime import datetime, timedelta
 from macro.common import get_web_site_crawling
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
-from datetime import datetime
 
+from macro.local_trainreservation.models.reservation_model import ReservationModel
+from macro.utils.email_sender import send_stmp
 from macro.utils.exception_handle import webdriver_exception_handler
-from selenium.webdriver.support import expected_conditions as EC
-
 
 logger = logging.getLogger()
 
 semaphore = threading.Semaphore(value=1)
 
 
-class ChatBotReservation(viewsets.GenericViewSet, mixins.ListModelMixin, View):
-
+class TrainReservation(viewsets.GenericViewSet, mixins.ListModelMixin, View):
     def train_reservation(self, request):
-        logger.debug(f'url : v1/chatbot-train-reservattion')
+        logger.debug(f'url : v1/train-reservattion')
         logger.debug(f'method: POST')
         logger.debug(f'request_data: {request.data}')
 
         try:
-            reservation_model = chatbot_reservation_model_setter(request)
-
             # validation
-            if is_valid_request(reservation_model=reservation_model):
+            if is_valid_request(request):
 
+                reservation_model = reservation_model_setter(request)
                 train_reserve(reservation_model=reservation_model)
             else:
                 return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
@@ -55,15 +44,15 @@ class ChatBotReservation(viewsets.GenericViewSet, mixins.ListModelMixin, View):
         return Response(data='예약 완료!', status=status.HTTP_200_OK)
 
 
-def is_valid_request(reservation_model):
+def is_valid_request(request):
     try:
-        req_startingPoint = reservation_model.starting_point
-        req_arrivalPoint = reservation_model.arrival_point
-        req_date = reservation_model.date
-        req_memberNum = reservation_model.member_num
-        req_trainType = reservation_model.train_type
-        req_contact = reservation_model.contact
-        req_seatType = reservation_model.seat_type
+        req_startingPoint = request.data['startingPoint']
+        req_arrivalPoint = request.data["arrivalPoint"]
+        req_date = request.data["date"]
+        req_memberNum = request.data["memberNum"]
+        req_trainType = request.data["trainType"]
+        req_contact = request.data["contact"]
+        req_seatType = request.data["seatType"]
 
         req_memberNum = int(req_memberNum)
 
@@ -80,65 +69,39 @@ def is_valid_request(reservation_model):
         # 현재는 ktx만 지원
         if req_trainType != 'ktx':
             return False
-
-        # 출발역 조회
-        if not chk_station(req_startingPoint):
-            return False
-
-        # 도착역 조회
-        if not chk_station(req_arrivalPoint):
-            return False
-
-        # 주어진 시간이 현재 시간보다 이전인지 확인
-        requested_time = datetime.strptime(req_date, "%Y-%m-%d %H")
-        current_time = datetime.now()
-
-        if requested_time <= current_time:
-            logger.error(f' requested_time : {requested_time}... why..? ')
-            return False
+        # Todo
+        # 시작역에 없는 역이 입력됐을 경우 역이 많다..
+        #   return False
+        # Todo
+        # 도착역에 없는 역이 입력됐을 경우 역이 많다..
+        #  return False
+        # Todo
+        # 현재 시간 보다 이전의 요청 날짜가 들어 올 경우.
+        # return False
 
         return True
     except Exception as err:
-        logger.error(f'train-reservation error:  {err}')
+        logger.debug(f'train-reservation error:  {err}')
+        logger.info(f'request value not appropriate / REQ VAL : {request.data}')
         return False
 
 
-def chatbot_reservation_model_setter(request):
-    data = request.data
-    origin_value = data["action"]["detailParams"]["ReservationEntity"]["origin"]
-    parts = origin_value.split(" / ")
-
+def reservation_model_setter(request):
     reservation_model = ReservationModel()
-    reservation_model.starting_point = parts[0]
-    reservation_model.arrival_point = parts[1]
-    reservation_model.date = parts[2]
+    reservation_model.starting_point = request.data['startingPoint']
+    reservation_model.arrival_point = request.data["arrivalPoint"]
+    reservation_model.date = request.data["date"]
     reservation_model.year = reservation_model.date[:4]
     reservation_model.month = reservation_model.date[5:7]
     reservation_model.day = reservation_model.date[8:10]
     reservation_model.hour = reservation_model.date[11:13]
-    reservation_model.member_num = parts[3]
-    reservation_model.train_type = parts[4]
-    reservation_model.contact = parts[5]
-    reservation_model.seat_type = parts[6]
+    reservation_model.member_num = request.data["memberNum"]
+    reservation_model.train_type = request.data["trainType"]
+    reservation_model.contact = request.data["contact"]
+    reservation_model.seat_type = request.data["seatType"]
 
     logger.info(f' train models : {reservation_model.__dict__}')
     return reservation_model
-
-
-def chk_station(target):
-    # 가능한 역 목록
-    valid_starting_points = {
-        "서울", "영등포", "광명", "수원", "오송", "대전", "천안아산", "김천", "동대구",
-        "서대구", "밀양", "구포", "울산", "신경주", "포항", "부산", "공주", "논산",
-        "계룡", "익산", "정읍", "광주송정", "나주", "목포", "창원", "진영", "창원중앙",
-        "마산", "진주", "남원", "전주", "곡성", "구례구", "순천", "여천", "여수엑스포",
-        "여수", "청량리", "상봉", "진부", "횡성", "진부(오대산)", "오대산", "둔내",
-        "평창", "양평", "만종", "강릉", "정동진", "묵호", "동해", "서원주", "원주",
-        "제천", "단양", "풍기", "영주", "안동", "부발", "가남", "감곡장호원", "앙성온천",
-        "앙성", "충주"
-    }
-
-    return any(starting_point in target for starting_point in valid_starting_points)
 
 
 def train_reserve(reservation_model):
@@ -171,93 +134,12 @@ def train_reserve(reservation_model):
     index = 0
     while time.time() < end_time and not flag:
 
-        try:
-            # 페이지 새로 고침.
-            page_search_refresh(reservation_model=reservation_model)
+        for index in range(10):
+            logger.info(
+                f"end_time : {end_time_formatted} index : {index} , reservation_model : {reservation_model.__dict__}")
+            flag = reservation_loop(reservation_model=reservation_model, url=url, index=index)
 
-            for index in range(10):
-                logger.info(
-                    f"end_time : {end_time_formatted} index : {index} , reservation_model : {reservation_model.__dict__}")
-                flag = reservation_loop(reservation_model=reservation_model, url=url, index=index)
-        except Exception as err:
-            logger.debug(f'{traceback.format_exc()}')
-            logger.debug(f'{err}')
-
-
-    logger.info(f' roop end...')
     return flag
-
-def page_search_refresh(reservation_model):
-    try:
-        train_search_url = "https://www.letskorail.com/index.jsp"
-        train_search = get_web_site_crawling(url=train_search_url)
-
-        reservation_btn = train_search.find_element(By.XPATH, '//img[@src="/images/lnb_mu01_01.gif"]')
-        reservation_btn.click()
-    except Exception as err:
-        train_search_url = "https://www.letskorail.com/ebizprd/EbizPrdTicketpr21100W_pr21110.do"
-        train_search = get_web_site_crawling(url=train_search_url)
-        # 승차권 예매 페이지 이동 후 driver 초기화
-    logger.info(f' 페이지 이동 : {train_search.current_url}')
-    train_search.get(train_search.current_url)
-
-    start_station = train_search.find_element(By.ID, "start")
-    arrival_station = train_search.find_element(By.ID, "get")
-
-    month = train_search.find_element(By.ID, "s_month")
-    day = train_search.find_element(By.ID, "s_day")
-    hour = train_search.find_element(By.ID, "s_hour")
-    members = train_search.find_element(By.ID, "peop01")
-
-    # 초기화
-    start_station.clear()
-    arrival_station.clear()
-
-    # 사용자 요청 값으로 세팅
-    start_station.send_keys(reservation_model.starting_point)
-    arrival_station.send_keys(reservation_model.arrival_point)
-    month.send_keys(reservation_model.month)
-    day.send_keys(reservation_model.day)
-
-    monthSelect = Select(month)
-    monthSelect.select_by_value(reservation_model.month)
-
-    daySelect = Select(day)
-    daySelect.select_by_value(reservation_model.day)
-
-    hourSelect = Select(hour)
-    hourSelect.select_by_value(reservation_model.hour)
-
-    # 사용자 요청 수 대로 선택
-    memberSelect = Select(members)
-    memberSelect.select_by_value(reservation_model.member_num)
-
-        # 요청 차종 선택
-    if reservation_model.train_type == "ktx":
-        train_btn = train_search.find_element(By.ID, "selGoTrainRa00")
-        train_btn.click()
-
-    # 조회 요청
-    search_btn = train_search.find_element(By.XPATH, '//img[@src="/images/btn_inq_tick.gif"]')
-    search_btn.click()
-
-    # 조회 시, 아이프레임 알림 뜨는 경우 처리.
-    try:
-        iframe = WebDriverWait(train_search, 1).until(
-            EC.presence_of_element_located(By.TAG_NAME, 'iframe')
-        )
-        train_search.switch_to.frame(iframe)
-
-        element = train_search.find_element(By.XPATH, '//a[@class="plainmodal-close"]')
-        element.click()
-
-        # iframe에서 빠져나옴
-        train_search.switch_to.default_content()
-
-    except Exception as err:
-        logger.info(f'알림없음 계속 진행. ')
-
-    train_search.implicitly_wait(3)
 
 
 def reservation_loop(reservation_model, url, index):
@@ -373,7 +255,7 @@ def reservation_loop(reservation_model, url, index):
 
                             # 안내 메시지 처리.
                             try:
-                                iframe = reserve_driver.find_element(By.TAG_NAME, 'iframe')
+                                iframe = reserve_driver.find_element(By.TAG_NAME,'iframe')
                                 reserve_driver.switch_to.frame(iframe)
 
                                 element = reserve_driver.find_element(By.XPATH, '//a[@class="btn_blue_ang"]')
@@ -416,3 +298,4 @@ def reservation_loop(reservation_model, url, index):
         logger.debug(f'{err}')
 
     return False
+

@@ -1,20 +1,14 @@
-import http.client
 import logging
 import traceback
 
 import requests
-from rest_framework import status
 
 from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from rest_framework.views import exception_handler
 
 logger = logging.getLogger()
 log_selenium = logging.getLogger('selenium')
 
-# customService = Service(ChromeDriverManager().install())
 custom_options = Options()
 custom_options.add_argument("--disable-extensions")
 custom_options.add_argument('--headless=new')
@@ -22,8 +16,6 @@ custom_options.add_argument('--no-sandbox')
 custom_options.add_argument('--lang=ko-KR')
 custom_options.add_argument('--disable-dev-shm-usage')
 
-# 연속성을 위해 전역으로 세팅
-# 성능 향상을 위해 쓰지 않는 옵션은 끄는게 좋지만 그렇게 큰 차이가 나지 않음.
 driver = webdriver.Chrome(options=custom_options)
 
 driver.execute_script("window.open('');")

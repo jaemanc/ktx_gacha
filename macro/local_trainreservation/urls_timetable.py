@@ -1,8 +1,8 @@
-from macro.timetable.train_reservation import TrainReservation
+from macro.local_trainreservation.train_reservation import TrainReservation
 
 from django.urls import path
 
-from macro.timetable.search_train import Train
+from macro.local_trainreservation.search_train import Train
 from macro.utils.email_sender import EmailSender
 
 urlpatterns = [
