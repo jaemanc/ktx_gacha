@@ -37,7 +37,7 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
                 get_train_thread.start()
 
                 use_callback = {
-                                  "version" : "2.6", # 이거는 버전이 동일해야 함.
+                                  "version" : "2.8", # 이거는 버전이 동일해야 함.
                                   "useCallback" : True,
                                   "context": {
                                   },
@@ -92,11 +92,11 @@ def get_train_list_chatbot(request):
     """
     parts = TrainListEntity.split(" / ")
 
-    starting_point = parts[0]  # 출발역
+    starting_point = parts[0].replace("조회 : ","").strip()  # 출발역
     arrival_point = parts[1]  # 도착역
     date_time = parts[2]  # 일시
     member_num = parts[3]  # 인원 수
-    train_type = parts[4].replace("조회","").strip()  # 열차 종류
+    train_type = parts[4]  # 열차 종류
 
     logger.info(f' TrainListEntity : {TrainListEntity} ')
 
@@ -273,7 +273,7 @@ def get_train_list_chatbot(request):
                                     "text": return_msg,
                                     "buttons": [
                                         {
-                                            "label": "예매하러 가기",
+                                            "label": "표 예약하러 가기",
                                             "action": "block",
                                             "blockId": "64ec11f6e4f55f6afe216dcc"
                                         }
