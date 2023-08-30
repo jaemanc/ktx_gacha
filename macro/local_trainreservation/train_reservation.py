@@ -22,7 +22,7 @@ semaphore = threading.Semaphore(value=1)
 
 class TrainReservation(viewsets.GenericViewSet, mixins.ListModelMixin, View):
     def train_reservation(self, request):
-        logger.debug(f'url : v1/train-reservattion')
+        logger.debug(f'url : v1/train-reservation')
         logger.debug(f'method: POST')
         logger.debug(f'request_data: {request.data}')
 
@@ -112,9 +112,6 @@ def train_reserve(reservation_model):
     # get driver - 목록 조회 페이지에서만 동작해야한다.
     reserve_driver = get_web_site_crawling()
 
-    url = reserve_driver.current_url
-    logger.info(f' current url : {url}')
-
     current_time = datetime.now()
 
     current_hour = current_time.hour
@@ -137,25 +134,24 @@ def train_reserve(reservation_model):
         for index in range(10):
             logger.info(
                 f"end_time : {end_time_formatted} index : {index} , reservation_model : {reservation_model.__dict__}")
-            flag = reservation_loop(reservation_model=reservation_model, url=url, index=index)
+            flag = reservation_loop(reservation_model=reservation_model, index=index)
 
     return flag
 
 
-def reservation_loop(reservation_model, url, index):
+def reservation_loop(reservation_model, index):
 
     reserve_driver = get_web_site_crawling()
-
-    # 조회 결과 테이블
-    table = reserve_driver.find_element(By.ID, "tableResult")
-
-    trs = table.find_elements(By.TAG_NAME, "tr")
-
-    # for tr in trs:
-    tr = trs[index]
-    count = 0
-
     try:
+        # 조회 결과 테이블
+        table = reserve_driver.find_element(By.ID, "tableResult")
+
+        trs = table.find_elements(By.TAG_NAME, "tr")
+
+        # for tr in trs:
+        tr = trs[index]
+        count = 0
+
         td_objs = tr.find_elements(By.TAG_NAME, "td")
 
         for td in td_objs:
@@ -291,7 +287,6 @@ def reservation_loop(reservation_model, url, index):
                 logger.info(f'v1/train-reservation error 1: {traceback.format_exc()}')
                 logger.info(f'{err}')
                 logger.info("일반실 매진")
-                logger.info(f' current : {reserve_driver.current_url} , default : {url}')
 
     except Exception as err:
         logger.debug(f'v1/train-reservation error 2: {traceback.format_exc()}')

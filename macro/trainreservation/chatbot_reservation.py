@@ -194,7 +194,7 @@ def train_reserve(reservation_model):
             for index in range(10):
                 logger.info(
                     f"end_time : {end_time_formatted} index : {index} , reservation_model : {reservation_model.__dict__}")
-                flag = reservation_loop(reservation_model=reservation_model, url=url, index=index)
+                flag = reservation_loop(reservation_model=reservation_model, index=index)
         except Exception as err:
             logger.debug(f'{traceback.format_exc()}')
             logger.debug(f'{err}')
@@ -275,7 +275,7 @@ def page_search_refresh(reservation_model):
     train_search.implicitly_wait(3)
 
 
-def reservation_loop(reservation_model, url, index):
+def reservation_loop(reservation_model, index):
 
     reserve_driver = get_web_site_crawling()
 
@@ -424,7 +424,6 @@ def reservation_loop(reservation_model, url, index):
                 logger.info(f'v1/train-reservation error 1: {traceback.format_exc()}')
                 logger.info(f'{err}')
                 logger.info("일반실 매진")
-                logger.info(f' current : {reserve_driver.current_url} , default : {url}')
 
     except Exception as err:
         logger.error(f'v1/train-reservation error 2: {traceback.format_exc()}')
