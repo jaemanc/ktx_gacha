@@ -14,12 +14,15 @@ driver = None
 def webdriver_exception_handler():
 
     try:
-        logger.info(f'##########################################')
-        logger.info(f'Initialize the web driver due to an error.')
-        logger.info(f'##########################################')
+        logger.error(f'##########################################')
+        logger.error(f'Initialize the web driver due to an error.')
+        logger.error(f'##########################################')
 
         # 연속성을 위해 전역으로 세팅
         global driver
+
+        if driver is not None:
+            driver.quit()
 
         driver = webdriver.Chrome(options=custom_options)
         driver.get('https://www.letskorail.com/ebizprd/prdMain.do')
@@ -28,7 +31,7 @@ def webdriver_exception_handler():
         macro.common.driver = driver
 
     except Exception as err:
-        logger.info(f' 서버 혹은 container를 재실행 해야 합니다!!! ')
-        logger.info(f'{traceback.format_exc()}')
-        logger.info(f'{err}')
+        logger.fatal(f'docker process ERROR ')
+        logger.fatal(f'{traceback.format_exc()}')
+        logger.fatal(f'{err}')
 

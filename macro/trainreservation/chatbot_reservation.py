@@ -32,7 +32,7 @@ semaphore = threading.Semaphore(value=1)
 class ChatBotReservation(viewsets.GenericViewSet, mixins.ListModelMixin, View):
 
     def train_reservation(self, request):
-        logger.debug(f'url : v1/chatbot-train-reservattion')
+        logger.debug(f'url : v1/chatbot-train-reservation')
         logger.debug(f'method: POST')
         logger.debug(f'request_data: {request.data}')
 
@@ -287,7 +287,7 @@ def reservation_loop(reservation_model, url, index):
             count += 1
 
             # td object에는 여러가지 값들이 있어서 필요한 값이 있는 순번에만 검색하도록 수정.
-            if count in {1, 2, 7, 8, 9, 10, 11, 12, 13, 14}:
+            if count not in {3, 4, 5, 6}:
                 continue
 
             if count == 3:
@@ -347,7 +347,7 @@ def reservation_loop(reservation_model, url, index):
                             logger.info(f' 특실 예약합니다. {go} , {reservation_model}')
 
                             # 예매 정보 이메일로 통보
-                            send_stmp(reservation_model)
+                            send_stmp(reservation_model=reservation_model)
 
                             # 장바구니에 담았으면?
                             return True
@@ -407,9 +407,9 @@ def reservation_loop(reservation_model, url, index):
                             logger.info(f' 일반실 예약합니다. {go} , {reservation_model}')
 
                             # 예매 정보 이메일로 통보
-                            send_stmp(reservation_model)
+                            send_stmp(reservation_model=reservation_model)
 
-                            # 장바구니에 담았으면?
+                            # 장바구니에 담김
                             return True
 
             except Exception as err:
@@ -419,7 +419,7 @@ def reservation_loop(reservation_model, url, index):
                 logger.info(f' current : {reserve_driver.current_url} , default : {url}')
 
     except Exception as err:
-        logger.debug(f'v1/train-reservation error 2: {traceback.format_exc()}')
-        logger.debug(f'{err}')
+        logger.error(f'v1/train-reservation error 2: {traceback.format_exc()}')
+        logger.error(f'{err}')
 
     return False

@@ -222,7 +222,7 @@ def reservation_loop(reservation_model, url, index):
                             logger.info(f' 특실 예약합니다. {go} , {reservation_model}')
 
                             # 예매 정보 이메일로 통보
-                            send_stmp(reservation_model)
+                            send_stmp(reservation_model=reservation_model)
 
                             # 장바구니에 담았으면?
                             return True
@@ -282,7 +282,7 @@ def reservation_loop(reservation_model, url, index):
                             logger.info(f' 일반실 예약합니다. {go} , {reservation_model}')
 
                             # 예매 정보 이메일로 통보
-                            send_stmp(reservation_model)
+                            send_stmp(reservation_model=reservation_model)
 
                             # 장바구니에 담았으면?
                             return True

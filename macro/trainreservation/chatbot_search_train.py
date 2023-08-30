@@ -15,6 +15,7 @@ from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 from datetime import datetime
 
+from macro.utils.email_sender import error_sender
 from macro.utils.exception_handle import webdriver_exception_handler
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -36,47 +37,43 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
                 get_train_thread = threading.Thread(target=get_train_list_chatbot, args=(request,))
                 get_train_thread.start()
 
-                use_callback = {
-                                  "version" : "2.9", # 이거는 버전이 동일해야 함.
-                                  "useCallback" : True,
-                                  "context": {
-                                  },
-                                  "data": {
-                                  }
-                                }
-                return Response(data=use_callback, status=status.HTTP_200_OK)
+                return Response(data={"version" : "3.0","useCallback" : True,"context": {},"data": {}}, status=status.HTTP_200_OK)
             else:
                 return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as err:
             logger.debug(f'v1/chatbot-train error: {traceback.format_exc()}')
             logger.debug(f'get train list error:  {err}')
+            error_sender(err)
             webdriver_exception_handler()
             return Response(data=None, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 def is_valid_date_chatbot(request):
+    try:
+        data = request.data
+        origin_value = data["action"]["detailParams"]["TrainListEntity"]["origin"]
+        parts = origin_value.split(" / ")
 
-    data = request.data
-    origin_value = data["action"]["detailParams"]["TrainListEntity"]["origin"]
-    parts = origin_value.split(" / ")
+        date_time = parts[2]  # 일시
 
-    date_time = parts[2]  # 일시
+        logger.info(date_time)
 
-    logger.info(date_time)
+        req_date = date_time
+        # 주어진 날짜와 시간을 datetime 객체로 변환
+        requested_time = datetime.strptime(req_date, "%Y-%m-%d %H")
 
-    req_date = date_time
-    # 주어진 날짜와 시간을 datetime 객체로 변환
-    requested_time = datetime.strptime(req_date, "%Y-%m-%d %H")
+        # 현재 시간 구하기
+        current_time = datetime.now()
 
-    # 현재 시간 구하기
-    current_time = datetime.now()
-
-    # 주어진 시간이 현재 시간보다 이전인지 확인
-    if requested_time <= current_time:
-        logger.info(f' requested_time : {requested_time}... why..? ')
+        # 주어진 시간이 현재 시간보다 이전인지 확인
+        if requested_time <= current_time:
+            logger.info(f' requested_time : {requested_time} 오늘 날짜 이전 요청은 불가능합니다!')
+            return False
+        else:
+            return True
+    except Exception as err:
         return False
-    else:
-        return True
+
 
 def get_train_list_chatbot(request):
     data = request.data
