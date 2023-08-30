@@ -254,7 +254,7 @@ def get_train_list_chatbot(request):
     if row_data:
         for entry in row_data:
             return_msg += (
-                '############################\n'
+                '--------------------\n'
                 '출발: {}\n도착: {}\n출발 시간: {}\n도착 시간: {}\n열차 타입: {}\n\n'
                 .format(
                     entry['go'].split()[0], entry['end'].split()[0],
@@ -271,12 +271,12 @@ def get_train_list_chatbot(request):
                         "outputs": [
                             {
                                 "textCard": {
-                                    "text": "챗봇 관리자센터에 오신 것을 환영합니다 🙂\n\n챗봇 관리자센터로 챗봇을 제작해 보세요. \n카카오톡 채널과 연결하여, 이용자에게 챗봇 서비스를 제공할 수 있습니다.",
+                                    "text": return_msg,
                                     "buttons": [
                                         {
-                                            "label": "예매",
+                                            "label": "예매하러 가기",
                                             "action": "block",
-                                            "blockId": "pgf3311er4tah52zdin4aiv0"
+                                            "blockId": "64ec11f6e4f55f6afe216dcc"
                                         }
                                     ]
                                 }
