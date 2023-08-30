@@ -272,7 +272,7 @@ def get_train_list_chatbot(request):
     # 조회 사항 이메일로 전송
     # train_list_sender(msg=return_msg)
     response = {
-        "version": "2.1",
+        "version": "2.2",
         "template": {
             "outputs": [
                 {
