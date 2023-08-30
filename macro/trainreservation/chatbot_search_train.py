@@ -282,11 +282,9 @@ def get_train_list_chatbot(request):
                 }
             ]
         },
-        "context":{
-
-        },
+        "useCallback":True,
         "data":{
-
+            "msg":"datas,.,,??"
         }
     }
 
