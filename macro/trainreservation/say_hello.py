@@ -12,17 +12,34 @@ class Chatbot(viewsets.GenericViewSet, mixins.ListModelMixin, View):
     def chatbot_test(self, request):
         logger.info(f" return msg test!!! ")
 
-        return_msg = '{"version":"2.0","template":{"outputs":[{"simpleText":{"text":"hello I\'m Ryan"}}]}}'
-
-        json_obj = json.loads(return_msg)
-
-        version = json_obj['version']
-        text = json_obj['template']['outputs'][0]['simpleText']['text']
+        return_msg = {
+  "version": "2.3",
+  "template": {
+    "outputs": [
+      {
+        "textCard": {
+          "text": "예매할거냠?",
+          "buttons": [
+            {
+              "label": "예매",
+              "action": "block",
+              "blockId": "pgf3311er4tah52zdin4aiv0",
+              "extra": {
+                "key1": "value1",
+                "key2": "value2"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "context": {},
+  "data": {}
+}
 
         # 변환된 JSON 객체 내용 확인
-        print("Version:", version)
-        print("Text:", text)
 
         logger.info(f' request data : {request.data}')
 
-        return Response(data=json_obj, status=status.HTTP_200_OK)
+        return Response(data=return_msg, status=status.HTTP_200_OK)
