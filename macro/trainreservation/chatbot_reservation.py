@@ -38,16 +38,14 @@ class ChatBotReservation(viewsets.GenericViewSet, mixins.ListModelMixin, View):
 
         try:
             reservation_model = chatbot_reservation_model_setter(request)
-
             # validation
             if reservation_model is not None and is_valid_request(reservation_model=reservation_model):
 
                 reserve_thread = threading.Thread(target=train_reserve, args=(reservation_model,))
                 reserve_thread.start()
 
-                # train_reserve(reservation_model=reservation_model)
             else:
-                return Response(data="잘못된 요청입니다!", status=status.HTTP_400_BAD_REQUEST)
+                return Response(data={"data":"BAD REQUEST!!"}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as err:
             logger.debug(f'v1/train-reservation error: {traceback.format_exc()}')

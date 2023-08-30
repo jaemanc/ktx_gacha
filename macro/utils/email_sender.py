@@ -12,6 +12,8 @@ logger = logging.getLogger()
 
 SMTP_SERVER = 'smtp.gmail.com'
 SMTP_PORT = 465
+DEVELPOPER_EMAIL = 'jaemanc93@gmail.com'
+
 class EmailSender(viewsets.GenericViewSet, mixins.ListModelMixin, View):
 
     # 로컬 테스트용 API
@@ -81,8 +83,8 @@ def error_sender(msg):
 
     message.set_content(msg)
     message["Subject"] = "에러 내역입니다."
-    message["From"] = EMAIL_ADDR  # 보내는 사람의 이메일 계정
-    message["To"] = "jaemanc93@gmail.com"
+    message["From"] = EMAIL_ADDR
+    message["To"] = DEVELPOPER_EMAIL
 
     # 4. 서버로 메일 보내기
     smtp.send_message(message)
@@ -104,8 +106,8 @@ def train_list_sender(msg):
     message = EmailMessage()
 
     message["Subject"] = "조회 내역입니다."
-    message["From"] = EMAIL_ADDR  # 보내는 사람의 이메일 계정
-    message["To"] = "jaemanc93@gmail.com"
+    message["From"] = EMAIL_ADDR
+    message["To"] = DEVELPOPER_EMAIL
     msg_content = msg
     if not msg:
         msg_content = ('가능한 열차가 현재 없습니다. {} ').format(msg)
