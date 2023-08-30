@@ -33,12 +33,15 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
             if is_valid_date_chatbot(request):
 
                 # 응답 우선을 위해 비동기 처리.
-                get_train_thread = threading.Thread(target=get_train_list_chatbot, args=(request,))
-                get_train_thread.start()
+                # get_train_thread = threading.Thread(target=get_train_list_chatbot, args=(request,))
+                # get_train_thread.start()
+                #
+                # response_data = {"msg":"조회 합니다!"}
 
-                response_data = {"msg":"조회 합니다!"}
+                # 콜백 기능 추가 테스트
+                msg = get_train_list_chatbot(request=request)
 
-                return Response(data=response_data, status=status.HTTP_200_OK)
+                return Response(data=msg, status=status.HTTP_200_OK)
             else:
                 return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
 
@@ -242,8 +245,21 @@ def get_train_list_chatbot(request):
             except NoSuchElementException as err:
                 logger.info("일반실 매진")
 
-    # 조회 사항 이메일로 전송
-    train_list_sender(msg=row_data)
-    logger.info(row_data)
+    return_msg = ""
+    if row_data:
+        for entry in row_data:
+            return_msg += (
+                '############################\n'
+                '출발: {}\n도착: {}\n출발 시간: {}\n도착 시간: {}\n열차 타입: {}\n\n'
+                .format(
+                    entry['go'].split()[0], entry['end'].split()[0],
+                    entry['go'].split()[1], entry['end'].split()[1],
+                    entry['kind']
+                )
+            )
 
-    return row_data
+    # 조회 사항 이메일로 전송
+    # train_list_sender(msg=return_msg)
+    logger.info(return_msg)
+
+    return return_msg
