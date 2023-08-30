@@ -262,6 +262,7 @@ def get_train_list_chatbot(request):
     # train_list_sender(msg=return_msg)
 
     response = {
+        "useCallback": True,
         "status": "SUCCESS",
         "message": return_msg
     }
