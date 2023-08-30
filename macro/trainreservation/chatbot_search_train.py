@@ -37,7 +37,7 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
                 get_train_thread.start()
 
                 use_callback = {
-                                  "version" : "2.8", # 이거는 버전이 동일해야 함.
+                                  "version" : "2.9", # 이거는 버전이 동일해야 함.
                                   "useCallback" : True,
                                   "context": {
                                   },

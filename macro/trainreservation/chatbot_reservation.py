@@ -40,7 +40,7 @@ class ChatBotReservation(viewsets.GenericViewSet, mixins.ListModelMixin, View):
             reservation_model = chatbot_reservation_model_setter(request)
 
             # validation
-            if is_valid_request(reservation_model=reservation_model):
+            if reservation_model is not None and is_valid_request(reservation_model=reservation_model):
 
                 reserve_thread = threading.Thread(target=train_reserve, args=(reservation_model,))
                 reserve_thread.start()
@@ -109,23 +109,28 @@ def is_valid_request(reservation_model):
 
 def chatbot_reservation_model_setter(request):
     data = request.data
-    origin_value = data["action"]["detailParams"]["ReservationEntity"]["origin"]
-    parts = origin_value.split(" / ")
 
-    reservation_model = ReservationModel()
-    reservation_model.starting_point = parts[0].replace("예매 : ","").strip()
-    reservation_model.arrival_point = parts[1]
-    reservation_model.date = parts[2]
-    reservation_model.year = reservation_model.date[:4]
-    reservation_model.month = reservation_model.date[5:7]
-    reservation_model.day = reservation_model.date[8:10]
-    reservation_model.hour = reservation_model.date[11:13]
-    reservation_model.member_num = parts[3]
-    reservation_model.train_type = parts[4]
-    reservation_model.contact = parts[5]
-    reservation_model.seat_type = parts[6]
+    try:
+        origin_value = data["action"]["detailParams"]["ReservationEntity"]["origin"]
+        parts = origin_value.split(" / ")
 
-    logger.info(f' train models : {reservation_model.__dict__}')
+        reservation_model = ReservationModel()
+        reservation_model.starting_point = parts[0].replace("예매 : ", "").strip()
+        reservation_model.arrival_point = parts[1]
+        reservation_model.date = parts[2]
+        reservation_model.year = reservation_model.date[:4]
+        reservation_model.month = reservation_model.date[5:7]
+        reservation_model.day = reservation_model.date[8:10]
+        reservation_model.hour = reservation_model.date[11:13]
+        reservation_model.member_num = parts[3]
+        reservation_model.train_type = parts[4]
+        reservation_model.contact = parts[5]
+        reservation_model.seat_type = parts[6]
+
+        logger.info(f' train models : {reservation_model.__dict__}')
+    except Exception as err:
+        return None
+
     return reservation_model
 
 
