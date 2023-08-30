@@ -2,6 +2,7 @@ import json
 import logging
 import threading
 import traceback
+import requests
 
 from django.views import View
 from selenium.common import NoSuchElementException
@@ -14,7 +15,6 @@ from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 from datetime import datetime
 
-from macro.utils.email_sender import train_list_sender
 from macro.utils.exception_handle import webdriver_exception_handler
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -40,6 +40,16 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
 
                 # 콜백 기능 추가 테스트
                 response = get_train_list_chatbot(request=request)
+
+                callback = request.data["userRequest"]["callbackUrl"]
+
+                headers = {
+                    "Content-Type": "application/json"
+                }
+
+                response = requests.post(callback, json=response, headers=headers)
+
+                logger.info(f'callback response : {response}')
 
                 return Response(data=response, status=status.HTTP_200_OK)
             else:
@@ -78,6 +88,7 @@ def is_valid_date_chatbot(request):
 def get_train_list_chatbot(request):
     data = request.data
     TrainListEntity = data["action"]["detailParams"]["TrainListEntity"]["origin"]
+
 
     """
         starting_point : 용산
@@ -260,11 +271,20 @@ def get_train_list_chatbot(request):
 
     # 조회 사항 이메일로 전송
     # train_list_sender(msg=return_msg)
-
     response = {
-        "useCallback": True,
-        "status": "SUCCESS",
-        "message": return_msg
+        "version": "2.1",
+        "template": {
+            "outputs": [
+                {
+                    "simpleText": {
+                        "text": return_msg
+                    }
+                }
+            ]
+        }
     }
+
+
+
     logger.info(response)
     return response
