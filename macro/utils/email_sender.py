@@ -103,10 +103,14 @@ def train_list_sender(msg):
     # 3. MIME 형태의 이메일 메세지 작성
     message = EmailMessage()
 
-    message.set_content(msg)
     message["Subject"] = "조회 내역입니다."
     message["From"] = EMAIL_ADDR  # 보내는 사람의 이메일 계정
     message["To"] = "jaemanc93@gmail.com"
+    msg_content = msg
+    if not msg:
+        msg_content = ('가능한 열차가 현재 없습니다. {} ').format(msg)
+
+    message.set_content(msg_content)
 
     # 4. 서버로 메일 보내기
     smtp.send_message(message)
