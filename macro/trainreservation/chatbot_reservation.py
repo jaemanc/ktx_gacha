@@ -88,12 +88,12 @@ def is_valid_request(reservation_model):
             return False
 
         # 출발역 조회
-        if not chk_station(req_startingPoint):
+        if not chk_station(target=req_startingPoint):
             logger.info(f"출발역을 다시 생각해보세요! : {req_startingPoint}")
             return False
 
         # 도착역 조회
-        if not chk_station(req_arrivalPoint):
+        if not chk_station(target=req_arrivalPoint):
             logger.info(f"도착역을 다시 생각해보세요! : {req_arrivalPoint}")
             return False
 
@@ -140,7 +140,7 @@ def chatbot_reservation_model_setter(request):
 
 def chk_station(target):
     # 가능한 역 목록
-    valid_starting_points = {
+    valid_starting_points = [
         "서울", "영등포", "광명", "수원", "오송", "대전", "천안아산", "김천", "동대구",
         "서대구", "밀양", "구포", "울산", "신경주", "포항", "부산", "공주", "논산",
         "계룡", "익산", "정읍", "광주송정", "나주", "목포", "창원", "진영", "창원중앙",
@@ -148,10 +148,13 @@ def chk_station(target):
         "여수", "청량리", "상봉", "진부", "횡성", "진부(오대산)", "오대산", "둔내",
         "평창", "양평", "만종", "강릉", "정동진", "묵호", "동해", "서원주", "원주",
         "제천", "단양", "풍기", "영주", "안동", "부발", "가남", "감곡장호원", "앙성온천",
-        "앙성", "충주"
-    }
+        "앙성", "충주", "용산"
+    ]
 
-    return any(starting_point in target for starting_point in valid_starting_points)
+    if target in valid_starting_points:
+        return True
+    else:
+        return False
 
 
 def train_reserve(reservation_model):
