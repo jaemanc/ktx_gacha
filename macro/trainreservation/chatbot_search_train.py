@@ -40,10 +40,8 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
                                   "version" : "2.0",
                                   "useCallback" : True,
                                   "context": {
-                                    ...
                                   },
                                   "data": {
-                                    ...
                                   }
                                 }
 
