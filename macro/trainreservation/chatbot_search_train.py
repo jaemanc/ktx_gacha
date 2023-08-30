@@ -33,25 +33,19 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
             if is_valid_date_chatbot(request):
 
                 # 응답 우선을 위해 비동기 처리.
-                # get_train_thread = threading.Thread(target=get_train_list_chatbot, args=(request,))
-                # get_train_thread.start()
-                #
-                # response_data = {"msg":"조회 합니다!"}
+                get_train_thread = threading.Thread(target=get_train_list_chatbot, args=(request,))
+                get_train_thread.start()
 
-                # 콜백 기능 추가 테스트
-                response = get_train_list_chatbot(request=request)
+                use_callback = {
+                                  "version" : "2.0",
+                                  "useCallback" : True,
+                                  "context": {
+                                  },
+                                  "data": {
+                                  }
+                                }
 
-                callback = request.data["userRequest"]["callbackUrl"]
-
-                headers = {
-                    "Content-Type": "application/json"
-                }
-
-                callback_response = requests.post(callback, json=response, headers=headers)
-
-                logger.info(f'callback response : {callback_response}')
-
-                return Response(data=response, status=status.HTTP_200_OK)
+                return Response(data=use_callback, status=status.HTTP_200_OK)
             else:
                 return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
 
@@ -277,18 +271,20 @@ def get_train_list_chatbot(request):
             "outputs": [
                 {
                     "simpleText": {
-                        "text": "간단한 메세지가 아니어서 안되는지 테스트"
+                        "text": return_msg
                     }
                 }
             ]
-        },
-        "useCallback":True,
-        "data":{
-            "msg":"datas,.,,??"
         }
     }
-
-
-
     logger.info(response)
+
+    callback = request.data["userRequest"]["callbackUrl"]
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    callback_response = requests.post(callback, json=response, headers=headers)
+
+    logger.info(callback_response)
     return response
