@@ -43,10 +43,11 @@ class ChatBotReservation(viewsets.GenericViewSet, mixins.ListModelMixin, View):
 
                 reserve_thread = threading.Thread(target=train_reserve, args=(reservation_model,))
                 reserve_thread.start()
-
             else:
                 return Response(data={"data":"BAD REQUEST!!"}, status=status.HTTP_400_BAD_REQUEST)
 
+            logger.info("스레드를 기다려보자!")
+            return Response(data={"msg":"SUCCESS"}, status=status.HTTP_200_OK)
         except Exception as err:
             logger.debug(f'v1/train-reservation error: {traceback.format_exc()}')
             logger.debug(f'train-reservation error:  {err}')
@@ -54,7 +55,7 @@ class ChatBotReservation(viewsets.GenericViewSet, mixins.ListModelMixin, View):
             webdriver_exception_handler()
             return Response(data=None, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(data='예약 완료!', status=status.HTTP_200_OK)
+
 
 
 def is_valid_request(reservation_model):
@@ -70,9 +71,11 @@ def is_valid_request(reservation_model):
         req_memberNum = int(req_memberNum)
 
         if req_memberNum <= 0:
+            logger.info("member plz...!")
             return False
 
         if req_contact == "":
+            logger.info("contact plz...!")
             return False
 
         # default 일반 좌석
@@ -81,14 +84,17 @@ def is_valid_request(reservation_model):
 
         # 현재는 ktx만 지원
         if req_trainType != 'ktx':
+            logger.info("ktx plz...!")
             return False
 
         # 출발역 조회
         if not chk_station(req_startingPoint):
+            logger.info(f"출발역을 다시 생각해보세요! : {req_startingPoint}")
             return False
 
         # 도착역 조회
         if not chk_station(req_arrivalPoint):
+            logger.info(f"도착역을 다시 생각해보세요! : {req_arrivalPoint}")
             return False
 
         # 주어진 시간이 현재 시간보다 이전인지 확인
@@ -189,7 +195,6 @@ def train_reserve(reservation_model):
         except Exception as err:
             logger.debug(f'{traceback.format_exc()}')
             logger.debug(f'{err}')
-
 
     logger.info(f' roop end...')
     return flag
