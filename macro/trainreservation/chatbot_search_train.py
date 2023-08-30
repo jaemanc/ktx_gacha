@@ -39,9 +39,9 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
                 # response_data = {"msg":"조회 합니다!"}
 
                 # 콜백 기능 추가 테스트
-                msg = get_train_list_chatbot(request=request)
+                response = get_train_list_chatbot(request=request)
 
-                return Response(data=msg, status=status.HTTP_200_OK)
+                return Response(data=response, status=status.HTTP_200_OK)
             else:
                 return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
 
@@ -260,6 +260,10 @@ def get_train_list_chatbot(request):
 
     # 조회 사항 이메일로 전송
     # train_list_sender(msg=return_msg)
-    logger.info(return_msg)
 
-    return return_msg
+    response = {
+        "status": "SUCCESS",
+        "message": return_msg
+    }
+    logger.info(response)
+    return response
