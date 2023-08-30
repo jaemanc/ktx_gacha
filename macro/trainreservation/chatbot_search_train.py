@@ -266,17 +266,30 @@ def get_train_list_chatbot(request):
     # 조회 사항 이메일로 전송
     # train_list_sender(msg=return_msg)
     response = {
-        "version": "2.3",
-        "template": {
+          "version": "2.3",
+          "template": {
             "outputs": [
-                {
-                    "simpleText": {
-                        "text": return_msg
-                    }
+              {
+                "textCard": {
+                  "text": "예매할거냠?",
+                  "buttons": [
+                            {
+                                "label": "예매",
+                                "action": "block",
+                                "blockId": "pgf3311er4tah52zdin4aiv0",
+                                "extra": {
+                                    "key1": "value1",
+                                    "key2": "value2"
+                                }
+                            }
+                    ]
                 }
+              }
             ]
+          },
+          "context":{},
+          "data":{"msg":return_msg}
         }
-    }
     logger.info(response)
 
     callback = request.data["userRequest"]["callbackUrl"]
@@ -286,5 +299,5 @@ def get_train_list_chatbot(request):
 
     callback_response = requests.post(callback, json=response, headers=headers)
 
-    logger.info(callback_response)
+    logger.info(callback_response.__dict__)
     return response
