@@ -37,7 +37,7 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
                 get_train_thread.start()
 
                 use_callback = {
-                                  "version" : "2.2",
+                                  "version" : "2.3",
                                   "useCallback" : True,
                                   "context": {
                                   },
@@ -50,7 +50,7 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
                 return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as err:
-            logger.debug(f'v1/train error: {traceback.format_exc()}')
+            logger.debug(f'v1/chatbot-train error: {traceback.format_exc()}')
             logger.debug(f'get train list error:  {err}')
             webdriver_exception_handler()
             return Response(data=None, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -266,7 +266,7 @@ def get_train_list_chatbot(request):
     # 조회 사항 이메일로 전송
     # train_list_sender(msg=return_msg)
     response = {
-        "version": "2.2",
+        "version": "2.3",
         "template": {
             "outputs": [
                 {
