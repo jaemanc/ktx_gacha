@@ -37,14 +37,13 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
                 get_train_thread.start()
 
                 use_callback = {
-                                  "version" : "2.4",
+                                  "version" : "2.5", # 이거는 버전이 동일해야 함.
                                   "useCallback" : True,
                                   "context": {
                                   },
                                   "data": {
                                   }
                                 }
-
                 return Response(data=use_callback, status=status.HTTP_200_OK)
             else:
                 return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
@@ -266,7 +265,7 @@ def get_train_list_chatbot(request):
     # 조회 사항 이메일로 전송
     # train_list_sender(msg=return_msg)
     response = {
-                    "version": "2.0",
+                    "version": "2.0", # 2.0 아니면 메세지 안보임 카카오쪽 버그인지?
                     "template": {
                         "outputs": [
                             {
