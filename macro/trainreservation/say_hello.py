@@ -13,7 +13,7 @@ class Chatbot(viewsets.GenericViewSet, mixins.ListModelMixin, View):
         logger.info(f" return msg test!!! ")
 
         return_msg = {
-                        "version": "2.3",
+                        "version": "2.0",
                         "template": {
                             "outputs": [
                                 {
@@ -23,11 +23,7 @@ class Chatbot(viewsets.GenericViewSet, mixins.ListModelMixin, View):
                                             {
                                                 "label": "예매",
                                                 "action": "block",
-                                                "blockId": "pgf3311er4tah52zdin4aiv0",
-                                                "extra": {
-                                                    "key1": "value1",
-                                                    "key2": "value2"
-                                                }
+                                                "blockId": "pgf3311er4tah52zdin4aiv0"
                                             }
                                         ]
                                     }
@@ -36,23 +32,23 @@ class Chatbot(viewsets.GenericViewSet, mixins.ListModelMixin, View):
                         }
                     }
 
-        simple_test_data = {
-                                "version": "2.0",
-                                "template": {
-                                    "outputs": [
-                                        {
-                                            "simpleText": {
-                                                "text": "간단한 텍스트 요소입니다."
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
+        # simple_test_data = {
+        #                         "version": "2.0",
+        #                         "template": {
+        #                             "outputs": [
+        #                                 {
+        #                                     "simpleText": {
+        #                                         "text": "간단한 텍스트 요소입니다."
+        #                                     }
+        #                                 }
+        #                             ]
+        #                         }
+        #                     }
 
 
         # 변환된 JSON 객체 내용 확인
 
         # logger.info(f' request data : {request.data}')
-        logger.info(f'{simple_test_data}')
+        logger.info(f'{return_msg}')
 
-        return Response(data=simple_test_data, status=status.HTTP_200_OK)
+        return Response(data=return_msg, status=status.HTTP_200_OK)

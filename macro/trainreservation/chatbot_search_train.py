@@ -37,7 +37,7 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
                 get_train_thread.start()
 
                 use_callback = {
-                                  "version" : "2.3",
+                                  "version" : "2.4",
                                   "useCallback" : True,
                                   "context": {
                                   },
@@ -266,30 +266,24 @@ def get_train_list_chatbot(request):
     # 조회 사항 이메일로 전송
     # train_list_sender(msg=return_msg)
     response = {
-          "version": "2.3",
-          "template": {
-            "outputs": [
-              {
-                "textCard": {
-                  "text": "예매할거냠?",
-                  "buttons": [
+                    "version": "2.4",
+                    "template": {
+                        "outputs": [
                             {
-                                "label": "예매",
-                                "action": "block",
-                                "blockId": "pgf3311er4tah52zdin4aiv0", # 예매블록으로 연계
-                                "extra": {
-                                    "key1": "value1",
-                                    "key2": "value2"
+                                "textCard": {
+                                    "text": "챗봇 관리자센터에 오신 것을 환영합니다 🙂\n\n챗봇 관리자센터로 챗봇을 제작해 보세요. \n카카오톡 채널과 연결하여, 이용자에게 챗봇 서비스를 제공할 수 있습니다.",
+                                    "buttons": [
+                                        {
+                                            "label": "예매",
+                                            "action": "block",
+                                            "blockId": "pgf3311er4tah52zdin4aiv0"
+                                        }
+                                    ]
                                 }
                             }
-                    ]
+                        ]
+                    }
                 }
-              }
-            ]
-          },
-          "context":{},
-          "data":{"msg":return_msg}
-        }
     logger.info(response)
 
     callback = request.data["userRequest"]["callbackUrl"]
