@@ -36,8 +36,23 @@ class Chatbot(viewsets.GenericViewSet, mixins.ListModelMixin, View):
                         }
                     }
 
+        simple_test_data = {
+                                "version": "2.0",
+                                "template": {
+                                    "outputs": [
+                                        {
+                                            "simpleText": {
+                                                "text": "간단한 텍스트 요소입니다."
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+
+
         # 변환된 JSON 객체 내용 확인
 
-        logger.info(f' request data : {request.data}')
+        # logger.info(f' request data : {request.data}')
+        logger.info(f'{simple_test_data}')
 
-        return Response(data=return_msg, status=status.HTTP_200_OK)
+        return Response(data=simple_test_data, status=status.HTTP_200_OK)
