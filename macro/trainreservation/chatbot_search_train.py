@@ -277,10 +277,16 @@ def get_train_list_chatbot(request):
             "outputs": [
                 {
                     "simpleText": {
-                        "text": return_msg
+                        "text": "간단한 메세지가 아니어서 안되는지 테스트"
                     }
                 }
             ]
+        },
+        "context":{
+
+        },
+        "data":{
+
         }
     }
 
