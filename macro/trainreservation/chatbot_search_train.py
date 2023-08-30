@@ -266,7 +266,7 @@ def get_train_list_chatbot(request):
     # 조회 사항 이메일로 전송
     # train_list_sender(msg=return_msg)
     response = {
-                    "version": "2.4",
+                    "version": "2.0",
                     "template": {
                         "outputs": [
                             {
