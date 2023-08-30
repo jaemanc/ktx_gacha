@@ -276,7 +276,7 @@ def get_train_list_chatbot(request):
                             {
                                 "label": "예매",
                                 "action": "block",
-                                "blockId": "pgf3311er4tah52zdin4aiv0",
+                                "blockId": "pgf3311er4tah52zdin4aiv0", # 예매블록으로 연계
                                 "extra": {
                                     "key1": "value1",
                                     "key2": "value2"
