@@ -96,7 +96,7 @@ def get_train_list_chatbot(request):
     arrival_point = parts[1]  # 도착역
     date_time = parts[2]  # 일시
     member_num = parts[3]  # 인원 수
-    train_type = parts[4]  # 열차 종류
+    train_type = parts[4].replace("조회","").strip()  # 열차 종류
 
     logger.info(f' TrainListEntity : {TrainListEntity} ')
 
