@@ -47,9 +47,9 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
                     "Content-Type": "application/json"
                 }
 
-                response = requests.post(callback, json=response, headers=headers)
+                callback_response = requests.post(callback, json=response, headers=headers)
 
-                logger.info(f'callback response : {response}')
+                logger.info(f'callback response : {callback_response}')
 
                 return Response(data=response, status=status.HTTP_200_OK)
             else:
