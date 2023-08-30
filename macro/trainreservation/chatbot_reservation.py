@@ -113,7 +113,7 @@ def chatbot_reservation_model_setter(request):
     parts = origin_value.split(" / ")
 
     reservation_model = ReservationModel()
-    reservation_model.starting_point = parts[0]
+    reservation_model.starting_point = parts[0].replace("예매 : ","").strip()
     reservation_model.arrival_point = parts[1]
     reservation_model.date = parts[2]
     reservation_model.year = reservation_model.date[:4]
