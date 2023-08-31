@@ -2,12 +2,13 @@ import logging
 import threading
 import traceback
 
+import requests
 from django.views import View
 from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 from macro.utils.buttons import Buttons
-from macro.utils.common import get_web_site_crawling, use_call_back_msg
+from macro.utils.common import get_web_site_crawling, use_call_back_msg, login_msg_and_callback_chatbot_response_message
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 
@@ -104,7 +105,12 @@ def login(request):
 
         login_btn.click()
 
-        logger.info(f" login success!! ")
+        response = login_msg_and_callback_chatbot_response_message(login_status_msg='로그인 했습니다!')
+
+        # callback msg send
+        callback_response = requests.post(request.data["userRequest"]["callbackUrl"], json=response, headers={"Content-Type": "application/json"})
+
+        logger.info(f" login success!! callback : {callback_response}")
 
     return login_page
 
