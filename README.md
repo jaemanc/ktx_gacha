@@ -2,6 +2,10 @@
 
 ###  카카오채널 챗봇과 연동한 ktx 예매 매크로 입니다. 
 
+__Blog__ : https://girinprogram93.tistory.com/108 
+<br>
+__Contact__ : jaemanc93@gmail.com
+
 ---
 <p align="center">
 
