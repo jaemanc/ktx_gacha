@@ -271,13 +271,20 @@ def reservation_loop(reservation_model, index):
     reserve_driver = get_web_site_crawling()
 
     # 조회 결과 테이블
-    table = reserve_driver.find_element(By.ID, Buttons.TABLE_RESULT)
 
-    trs = table.find_elements(By.TAG_NAME, Buttons.TABLE_TR)
+    table = None
+    trs = None
+    tr = None
+    try:
+        table = reserve_driver.find_element(By.ID, Buttons.TABLE_RESULT)
+        trs = table.find_elements(By.TAG_NAME, Buttons.TABLE_TR)
 
-    # for tr in trs:
-    tr = trs[index]
-    count = 0
+        # for tr in trs:
+        tr = trs[index]
+        count = 0
+    except Exception as err:
+        logger.info(f'loop exit!!! : {index}')
+        return True
 
     try:
         td_objs = tr.find_elements(By.TAG_NAME, Buttons.TABLE_TD)
@@ -332,7 +339,7 @@ def reservation_loop(reservation_model, index):
                                 reserve_driver.switch_to.default_content()
 
                             except Exception as err:
-                                logger.info(f' 계속 진행. ')
+                                logger.info(f'iframe not found... keep go! ')
 
                             while True:
                                 try:
@@ -343,7 +350,7 @@ def reservation_loop(reservation_model, index):
                                     break
 
                             reservation_model.go = go
-                            logger.info(f' 특실 예약합니다. {go} , {reservation_model}')
+                            logger.info(f' 특실 예약합니다. {go} , {reservation_model.__dict__}')
 
                             # 예매 정보 이메일로 통보
                             send_stmp(reservation_model=reservation_model)
@@ -391,7 +398,7 @@ def reservation_loop(reservation_model, index):
                                 reserve_driver.switch_to.default_content()
 
                             except Exception as err:
-                                logger.info(f' 계속 진행. ')
+                                logger.info(f'iframe not found... keep go! ')
 
                             while True:
                                 try:
@@ -403,7 +410,7 @@ def reservation_loop(reservation_model, index):
 
                             # 선택한 출발 시간 세팅
                             reservation_model.go = go
-                            logger.info(f' 일반실 예약합니다. {go} , {reservation_model}')
+                            logger.info(f'일반실 예약합니다. {go} , {reservation_model.__dict__}')
 
                             # 예매 정보 이메일로 통보
                             send_stmp(reservation_model=reservation_model)
