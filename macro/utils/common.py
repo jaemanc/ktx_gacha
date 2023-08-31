@@ -51,7 +51,7 @@ def get_web_site_crawling(**kwargs):
 
 
 def use_call_back_msg():
-    return {"version": "3.3", "useCallback": True, "context": {}, "data": {}}
+    return {"version": "3.4", "useCallback": True, "context": {}, "data": {}}
 
 
 def train_list_and_callback_chatbot_response_message(train_list):
