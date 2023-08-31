@@ -2,13 +2,12 @@ import logging
 import traceback
 
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 
-from macro.common import get_web_site_crawling
-import macro.common
+from macro.utils.common import get_web_site_crawling
+import macro.utils.common
 
 logger = logging.getLogger()
-custom_options = macro.common.custom_options
+custom_options = macro.utils.common.custom_options
 driver = None
 
 def webdriver_exception_handler():
@@ -28,7 +27,7 @@ def webdriver_exception_handler():
         driver.get('https://www.letskorail.com/ebizprd/prdMain.do')
 
         # 에러 이후 드라이버가 종료되면 다른 작업들도 다막히기 때문에 수정.
-        macro.common.driver = driver
+        macro.utils.common.driver = driver
 
     except Exception as err:
         logger.fatal(f'docker process ERROR ')

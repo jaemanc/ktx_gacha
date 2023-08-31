@@ -50,3 +50,27 @@ def get_web_site_crawling(**kwargs):
         return driver
 
 
+def use_call_back_msg():
+    return {"version": "3.0", "useCallback": True, "context": {}, "data": {}}
+
+
+def train_list_and_callback_chatbot_response_message(train_list):
+    return {
+            "version": "2.0", # 2.0 아니면 메세지 안보임. 버그인지 의도인지 카카오에 문의 한 상태 2023 08 30
+            "template": {
+                "outputs": [
+                    {
+                        "textCard": {
+                            "text": train_list,
+                            "buttons": [
+                                {
+                                    "label": "표 예약하러 가기",
+                                    "action": "block",
+                                    "blockId": "64ec11f6e4f55f6afe216dcc"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+            }

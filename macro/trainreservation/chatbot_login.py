@@ -5,12 +5,15 @@ import traceback
 from django.views import View
 from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
-from macro.common import get_web_site_crawling
+
+from macro.utils.buttons import Buttons
+from macro.utils.common import get_web_site_crawling, use_call_back_msg
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 
 from macro.utils.email_sender import error_sender
 from macro.utils.exception_handle import webdriver_exception_handler
+from macro.utils.pages import Pages
 
 logger = logging.getLogger()
 log_selenium = logging.getLogger('selenium')
@@ -30,12 +33,12 @@ class ChatBotLogin(viewsets.GenericViewSet, mixins.ListModelMixin, View):
         logger.debug(f'request_data: {request.data}')
 
         try:
-            # 응답 우선을 위해 비동기 처리.
+            # 챗봇 콜백 정책으로 인해 응답 우선 비동기 처리.
             login_thread = threading.Thread(target=login, args=(request,))
             login_thread.start()
             # login(request)
 
-            return Response(data=request.data, status=status.HTTP_200_OK)
+            return Response(data=use_call_back_msg(), status=status.HTTP_200_OK)
 
         except Exception as err:
             logger.debug(f'v1/chatbot-login error: {traceback.format_exc()}')
@@ -62,16 +65,14 @@ def login(request):
     logger.info(f'bot_id : {bot_id}')
     logger.info(f'intent_id : {intent_id}')
     logger.info(f'loginentity_origin : {loginentity_origin} , membershipNum : {membershipNum} , password : {password}')
-    req_membershipNum = membershipNum
-    req_password = password
 
     login_page = None
 
     try:
-        login_page = get_web_site_crawling(url="https://www.letskorail.com/ebizprd/prdMain.do")
+        login_page = get_web_site_crawling(url=Pages.KTX_MAIN_PAGE_DO)
         logger.info(f'driver session id: {login_page.session_id}')
     except Exception as err:
-        login_page = get_web_site_crawling(url="https://www.letskorail.com")
+        login_page = get_web_site_crawling(url=Pages.KTX_MAIN_PAGE)
         logger.info(f'retried.. go! {login_page.current_url}, driver session id: {login_page.session_id}')
 
     finally:
@@ -79,27 +80,27 @@ def login(request):
 
         # 로그인 페이지 이동.
         try:
-            go_to_login_page_button = login_page.find_element(By.XPATH, '//img[@src="/images/gnb_login.gif"]')
+            go_to_login_page_button = login_page.find_element(By.XPATH, Buttons.IMG_SRC_GNB_LOGIN)
         except NoSuchElementException:
-            go_to_login_page_button = login_page.find_element(By.XPATH, '//img[@src="/images/gnb_home.gif"]')
+            go_to_login_page_button = login_page.find_element(By.XPATH, Buttons.IMG_SRC_GNB_HOME)
 
         go_to_login_page_button.click()
 
         login_page.implicitly_wait(3)
 
-        member_numbs = login_page.find_element(By.ID, "txtMember")
-        member_numbs.send_keys(req_membershipNum)
+        member_numbs_element = login_page.find_element(By.ID, Buttons.TXT_MEMBER)
+        member_numbs_element.send_keys(membershipNum)
 
-        password = login_page.find_element(By.ID, "txtPwd")
-        password.send_keys(req_password)
+        password_element = login_page.find_element(By.ID, Buttons.TXT_PWD)
+        password_element.send_keys(password)
 
         try:
-            login_btn = login_page.find_element(By.XPATH, '//img[@src="/images/btn_login.gif"]')
+            login_btn = login_page.find_element(By.XPATH, Buttons.IMG_SRC_BTN_LOGIN)
         except NoSuchElementException:
             try:
-                login_btn = login_page.find_element(By.XPATH, 'a[href="javascript:Login(1);"]')
+                login_btn = login_page.find_element(By.XPATH, Buttons.HREF_LOGIN_BTN)
             except NoSuchElementException:
-                login_btn = login_page.find_element(By.XPATH, 'li.btn_login')
+                login_btn = login_page.find_element(By.XPATH, Buttons.LI_BTN_LOGIN)
 
         login_btn.click()
 

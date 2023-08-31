@@ -8,14 +8,15 @@ from django.views import View
 from selenium.webdriver.common.alert import Alert
 from datetime import timedelta
 
-from macro.local_trainreservation.models.reservation_model import ReservationModel
+from macro.trainreservation.models.reservation_model import ReservationModel
+from macro.utils.buttons import Buttons, Seat
 from macro.utils.email_sender import send_stmp, error_sender
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
-from macro.common import get_web_site_crawling
+from macro.utils.common import get_web_site_crawling
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 from datetime import datetime
@@ -23,6 +24,7 @@ from datetime import datetime
 from macro.utils.exception_handle import webdriver_exception_handler
 from selenium.webdriver.support import expected_conditions as EC
 
+from macro.utils.pages import Pages, Stations
 
 logger = logging.getLogger()
 
@@ -140,18 +142,7 @@ def chatbot_reservation_model_setter(request):
 
 def chk_station(target):
     # 가능한 역 목록
-    valid_starting_points = [
-        "서울", "영등포", "광명", "수원", "오송", "대전", "천안아산", "김천", "동대구",
-        "서대구", "밀양", "구포", "울산", "신경주", "포항", "부산", "공주", "논산",
-        "계룡", "익산", "정읍", "광주송정", "나주", "목포", "창원", "진영", "창원중앙",
-        "마산", "진주", "남원", "전주", "곡성", "구례구", "순천", "여천", "여수엑스포",
-        "여수", "청량리", "상봉", "진부", "횡성", "진부(오대산)", "오대산", "둔내",
-        "평창", "양평", "만종", "강릉", "정동진", "묵호", "동해", "서원주", "원주",
-        "제천", "단양", "풍기", "영주", "안동", "부발", "가남", "감곡장호원", "앙성온천",
-        "앙성", "충주", "용산"
-    ]
-
-    if target in valid_starting_points:
+    if target in Stations.VALID_STATIONS:
         return True
     else:
         return False
@@ -204,25 +195,25 @@ def train_reserve(reservation_model):
 
 def page_search_refresh(reservation_model):
     try:
-        train_search_url = "https://www.letskorail.com/index.jsp"
+        train_search_url = Pages.KTX_MAIN_PAGE_INDEX
         train_search = get_web_site_crawling(url=train_search_url)
 
-        reservation_btn = train_search.find_element(By.XPATH, '//img[@src="/images/lnb_mu01_01.gif"]')
+        reservation_btn = train_search.find_element(By.XPATH, Buttons.IMG_SRC_LNB_MU01_01)
         reservation_btn.click()
     except Exception as err:
-        train_search_url = "https://www.letskorail.com/ebizprd/EbizPrdTicketpr21100W_pr21110.do"
+        train_search_url = Pages.KTX_SEARCH_PAGE
         train_search = get_web_site_crawling(url=train_search_url)
         # 승차권 예매 페이지 이동 후 driver 초기화
     logger.info(f' 페이지 이동 : {train_search.current_url}')
     train_search.get(train_search.current_url)
 
-    start_station = train_search.find_element(By.ID, "start")
-    arrival_station = train_search.find_element(By.ID, "get")
+    start_station = train_search.find_element(By.ID, Buttons.START)
+    arrival_station = train_search.find_element(By.ID, Buttons.GET)
 
-    month = train_search.find_element(By.ID, "s_month")
-    day = train_search.find_element(By.ID, "s_day")
-    hour = train_search.find_element(By.ID, "s_hour")
-    members = train_search.find_element(By.ID, "peop01")
+    month = train_search.find_element(By.ID, Buttons.S_MONTH)
+    day = train_search.find_element(By.ID, Buttons.S_DAY)
+    hour = train_search.find_element(By.ID, Buttons.S_HOUR)
+    members = train_search.find_element(By.ID, Buttons.S_MEMBER)
 
     # 초기화
     start_station.clear()
@@ -249,21 +240,21 @@ def page_search_refresh(reservation_model):
 
         # 요청 차종 선택
     if reservation_model.train_type == "ktx":
-        train_btn = train_search.find_element(By.ID, "selGoTrainRa00")
+        train_btn = train_search.find_element(By.ID, Buttons.SELECT_TRAIN_KTX)
         train_btn.click()
 
     # 조회 요청
-    search_btn = train_search.find_element(By.XPATH, '//img[@src="/images/btn_inq_tick.gif"]')
+    search_btn = train_search.find_element(By.XPATH, Buttons.IMG_SRC_BTN_ING_TICK)
     search_btn.click()
 
     # 조회 시, 아이프레임 알림 뜨는 경우 처리.
     try:
         iframe = WebDriverWait(train_search, 1).until(
-            EC.presence_of_element_located(By.TAG_NAME, 'iframe')
+            EC.presence_of_element_located(By.TAG_NAME, Buttons.IFRAME)
         )
         train_search.switch_to.frame(iframe)
 
-        element = train_search.find_element(By.XPATH, '//a[@class="plainmodal-close"]')
+        element = train_search.find_element(By.XPATH, Buttons.IFRAME_CLOSE)
         element.click()
 
         # iframe에서 빠져나옴
@@ -280,16 +271,16 @@ def reservation_loop(reservation_model, index):
     reserve_driver = get_web_site_crawling()
 
     # 조회 결과 테이블
-    table = reserve_driver.find_element(By.ID, "tableResult")
+    table = reserve_driver.find_element(By.ID, Buttons.TABLE_RESULT)
 
-    trs = table.find_elements(By.TAG_NAME, "tr")
+    trs = table.find_elements(By.TAG_NAME, Buttons.TABLE_TR)
 
     # for tr in trs:
     tr = trs[index]
     count = 0
 
     try:
-        td_objs = tr.find_elements(By.TAG_NAME, "td")
+        td_objs = tr.find_elements(By.TAG_NAME, Buttons.TABLE_TD)
 
         for td in td_objs:
             count += 1
@@ -310,13 +301,13 @@ def reservation_loop(reservation_model, index):
 
             try:
                 # 특실
-                element = td.find_element(By.TAG_NAME, "img")
+                element = td.find_element(By.TAG_NAME, Buttons.TAG_NAME_IMG)
 
-                img_name = element.get_attribute("name")
+                img_name = element.get_attribute(Buttons.ATTRIBUTE_NAME)
                 btn_names_special = {f"btnRsv2_{i}" for i in range(10)}
 
                 if img_name in btn_names_special:
-                    if reservation_model.seat_type == "특실":
+                    if reservation_model.seat_type == Seat.SPECIAL_SEAT:
                         # 출발 시간이 20 분 넘게 남았는가?
                         go = go[4:8]
                         hour, minute = map(int, go.split(":"))
@@ -329,10 +320,10 @@ def reservation_loop(reservation_model, index):
 
                             # 안내 메시지 처리.
                             try:
-                                iframe = reserve_driver.find_element(By.TAG_NAME, 'iframe')
+                                iframe = reserve_driver.find_element(By.TAG_NAME, Buttons.IFRAME)
                                 reserve_driver.switch_to.frame(iframe)
 
-                                element = reserve_driver.find_element(By.XPATH, '//a[@class="btn_blue_ang"]')
+                                element = reserve_driver.find_element(By.XPATH, Buttons.IFRAME_CLOSE_BTN_BLUE)
 
                                 if element:
                                     element.click()
@@ -367,14 +358,14 @@ def reservation_loop(reservation_model, index):
 
             try:
                 # 일반실 예약하기 클릭
-                element = td.find_element(By.TAG_NAME, "img")
+                element = td.find_element(By.TAG_NAME, Buttons.TAG_NAME_IMG)
 
-                img_name = element.get_attribute("name")
+                img_name = element.get_attribute(Buttons.ATTRIBUTE_NAME)
                 btn_names_special = {f"btnRsv1_{i}" for i in range(10)}
 
                 if img_name in btn_names_special:
 
-                    if reservation_model.seat_type == "일반":
+                    if reservation_model.seat_type == Seat.ECONOMY_SEAT:
                         # 출발 시간이 20 분 넘게 남았는가?
                         go = go[4:8]
                         hour, minute = map(int, go.split(":"))
@@ -388,10 +379,10 @@ def reservation_loop(reservation_model, index):
 
                             # 안내 메시지 처리.
                             try:
-                                iframe = reserve_driver.find_element(By.TAG_NAME, 'iframe')
+                                iframe = reserve_driver.find_element(By.TAG_NAME, Buttons.IFRAME)
                                 reserve_driver.switch_to.frame(iframe)
 
-                                element = reserve_driver.find_element(By.XPATH, '//a[@class="btn_blue_ang"]')
+                                element = reserve_driver.find_element(By.XPATH, Buttons.IFRAME_CLOSE_BTN_BLUE)
 
                                 if element:
                                     element.click()

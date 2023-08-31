@@ -6,7 +6,7 @@ from django.views import View
 from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
-from macro.common import get_web_site_crawling
+from macro.utils.common import get_web_site_crawling
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 from datetime import datetime

@@ -7,11 +7,11 @@ from django.views import View
 from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.by import By
 from datetime import datetime, timedelta
-from macro.common import get_web_site_crawling
+from macro.utils.common import get_web_site_crawling
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 
-from macro.local_trainreservation.models.reservation_model import ReservationModel
+from macro.trainreservation.models.reservation_model import ReservationModel
 from macro.utils.email_sender import send_stmp
 from macro.utils.exception_handle import webdriver_exception_handler
 

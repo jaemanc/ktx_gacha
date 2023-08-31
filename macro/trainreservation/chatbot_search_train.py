@@ -1,4 +1,3 @@
-import json
 import logging
 import threading
 import traceback
@@ -10,7 +9,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
-from macro.common import get_web_site_crawling
+from macro.utils.buttons import Buttons, Seat
+from macro.utils.common import get_web_site_crawling, use_call_back_msg, \
+    train_list_and_callback_chatbot_response_message
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 from datetime import datetime
@@ -19,6 +20,7 @@ from macro.utils.email_sender import error_sender
 from macro.utils.exception_handle import webdriver_exception_handler
 from selenium.webdriver.support import expected_conditions as EC
 
+from macro.utils.pages import Pages
 
 logger = logging.getLogger()
 
@@ -30,14 +32,14 @@ class ChatBotSearchTrain(viewsets.GenericViewSet, mixins.ListModelMixin, View):
         logger.debug(f'request_data: {request.data}')
 
         try:
-            # 오늘 날짜 이전 데이터 조회 방어
+            # 오늘 날짜 이전 데이터 조회 유효성 검사
             if is_valid_date_chatbot(request):
 
-                # 응답 우선을 위해 비동기 처리.
+                # 챗봇 콜백 정책으로 인해 응답 우선 비동기 처리.
                 get_train_thread = threading.Thread(target=get_train_list_chatbot, args=(request,))
                 get_train_thread.start()
 
-                return Response(data={"version" : "3.0","useCallback" : True,"context": {},"data": {}}, status=status.HTTP_200_OK)
+                return Response(data=use_call_back_msg(), status=status.HTTP_200_OK)
             else:
                 return Response(data=None, status=status.HTTP_400_BAD_REQUEST)
 
@@ -111,13 +113,13 @@ def get_train_list_chatbot(request):
 
     # 조회 로직 리팩토링
     try:
-        train_search_url = "https://www.letskorail.com/index.jsp"
+        train_search_url = Pages.KTX_MAIN_PAGE_INDEX
         train_search = get_web_site_crawling(url=train_search_url)
 
-        reservation_btn = train_search.find_element(By.XPATH, '//img[@src="/images/lnb_mu01_01.gif"]')
+        reservation_btn = train_search.find_element(By.XPATH, Buttons.IMG_SRC_LNB_MU01_01 )
         reservation_btn.click()
     except Exception as err:
-        train_search_url = "https://www.letskorail.com/ebizprd/EbizPrdTicketpr21100W_pr21110.do"
+        train_search_url = Pages.KTX_SEARCH_PAGE
         train_search = get_web_site_crawling(url=train_search_url)
 
 
@@ -125,13 +127,13 @@ def get_train_list_chatbot(request):
     logger.info(f' 페이지 이동 : {train_search.current_url}')
     train_search.get(train_search.current_url)
 
-    start_station = train_search.find_element(By.ID, "start")
-    arrival_station = train_search.find_element(By.ID, "get")
+    start_station = train_search.find_element(By.ID, Buttons.START)
+    arrival_station = train_search.find_element(By.ID, Buttons.GET)
 
-    month = train_search.find_element(By.ID, "s_month")
-    day = train_search.find_element(By.ID, "s_day")
-    hour = train_search.find_element(By.ID, "s_hour")
-    members = train_search.find_element(By.ID, "peop01")
+    month = train_search.find_element(By.ID, Buttons.S_MONTH)
+    day = train_search.find_element(By.ID, Buttons.S_DAY)
+    hour = train_search.find_element(By.ID, Buttons.S_HOUR)
+    members = train_search.find_element(By.ID, Buttons.S_MEMBER)
 
     # 초기화
     start_station.clear()
@@ -159,22 +161,22 @@ def get_train_list_chatbot(request):
     logger.info(f' 요청 시간 : {req_year} / {req_month} / {req_day} / {req_hour}')
 
     # 요청 차종 선택
-    if req_trainType == "ktx":
-        train_btn = train_search.find_element(By.ID, "selGoTrainRa00")
+    if req_trainType == Buttons.SELECT_TRAIN_KTX:
+        train_btn = train_search.find_element(By.ID, Buttons.SELECT_TRAIN_KTX)
         train_btn.click()
 
     # 조회 요청
-    search_btn = train_search.find_element(By.XPATH, '//img[@src="/images/btn_inq_tick.gif"]')
+    search_btn = train_search.find_element(By.XPATH, Buttons.IMG_SRC_BTN_ING_TICK)
     search_btn.click()
 
     # 조회 후에 가끔 아이프레임 페이지 뜨는 경우 있음 없는 경우를 위해 시간 단축 처리.
     try:
         iframe = WebDriverWait(train_search, 1).until(
-            EC.presence_of_element_located(By.TAG_NAME, 'iframe')
+            EC.presence_of_element_located(By.TAG_NAME, Buttons.IFRAME)
         )
         train_search.switch_to.frame(iframe)
 
-        element = train_search.find_element(By.XPATH, '//a[@class="plainmodal-close"]')
+        element = train_search.find_element(By.XPATH, Buttons.IFRAME_CLOSE)
         element.click()
 
         # iframe에서 빠져나옴
@@ -185,15 +187,15 @@ def get_train_list_chatbot(request):
 
     train_search.implicitly_wait(3)
 
-    table = train_search.find_element(By.ID, "tableResult")
+    table = train_search.find_element(By.ID, Buttons.TABLE_RESULT)
 
-    trs = table.find_elements(By.TAG_NAME, "tr")
+    trs = table.find_elements(By.TAG_NAME, Buttons.TABLE_TR)
 
     row_data = []
 
     for tr in trs:
         count = 0
-        td_objs = tr.find_elements(By.TAG_NAME, "td")
+        td_objs = tr.find_elements(By.TAG_NAME, Buttons.TABLE_TD)
 
         for td in td_objs:
             count += 1
@@ -214,16 +216,16 @@ def get_train_list_chatbot(request):
 
             try:
                 # 특실
-                element = td.find_element(By.TAG_NAME, "img")
+                element = td.find_element(By.TAG_NAME, Buttons.TAG_NAME_IMG)
 
-                img_name = element.get_attribute("name")
+                img_name = element.get_attribute(Buttons.ATTRIBUTE_NAME)
                 btn_names_special = {f"btnRsv2_{i}" for i in range(10)}
 
                 if img_name in btn_names_special:
                     row_data.append({
                         "go": go,
                         "end": end,
-                        "kind": "특실"
+                        "kind": Seat.SPECIAL_SEAT
                     })
 
             except NoSuchElementException as err:
@@ -231,25 +233,25 @@ def get_train_list_chatbot(request):
 
             try:
                 # 일반실
-                element = td.find_element(By.TAG_NAME, "img")
+                element = td.find_element(By.TAG_NAME, Buttons.TAG_NAME_IMG)
 
-                img_name = element.get_attribute("name")
+                img_name = element.get_attribute(Buttons.ATTRIBUTE_NAME)
                 btn_names_special = {f"btnRsv1_{i}" for i in range(10)}
 
                 if img_name in btn_names_special:
                     row_data.append({
                         "go": go,
                         "end": end,
-                        "kind": "일반"
+                        "kind": Seat.ECONOMY_SEAT
                     })
 
             except NoSuchElementException as err:
                 logger.info("일반실 매진")
 
-    return_msg = ""
+    train_list = ""
     if row_data:
         for entry in row_data:
-            return_msg += (
+            train_list += (
                 '--------------------\n'
                 '출발: {}\n도착: {}\n출발 시간: {}\n도착 시간: {}\n열차 타입: {}\n\n'
                 .format(
@@ -259,35 +261,11 @@ def get_train_list_chatbot(request):
                 )
             )
 
-    # 조회 사항 이메일로 전송
-    # train_list_sender(msg=return_msg)
-    response = {
-                    "version": "2.0", # 2.0 아니면 메세지 안보임 카카오쪽 버그인지?
-                    "template": {
-                        "outputs": [
-                            {
-                                "textCard": {
-                                    "text": return_msg,
-                                    "buttons": [
-                                        {
-                                            "label": "표 예약하러 가기",
-                                            "action": "block",
-                                            "blockId": "64ec11f6e4f55f6afe216dcc"
-                                        }
-                                    ]
-                                }
-                            }
-                        ]
-                    }
-                }
+    response = train_list_and_callback_chatbot_response_message(train_list=train_list)
     logger.info(response)
 
-    callback = request.data["userRequest"]["callbackUrl"]
-    headers = {
-        "Content-Type": "application/json"
-    }
-
-    callback_response = requests.post(callback, json=response, headers=headers)
+    # 조회 사항 콜백 하단부 예약 버튼 포함
+    callback_response = requests.post(request.data["userRequest"]["callbackUrl"], json=response, headers={"Content-Type": "application/json"})
 
     logger.info(callback_response.__dict__)
     return response
