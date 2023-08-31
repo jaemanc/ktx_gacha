@@ -1,13 +1,13 @@
 # ktx_gacha
 
 ---
-
+<p align="center">
 ![로그인 페이지](https://github.com/jaemanc/ktx_gacha/assets/104718153/cc030dda-eecf-4972-a2ea-cd7e4b981371)
 
 ![기차 조회](https://github.com/jaemanc/ktx_gacha/assets/104718153/167f77b2-bf02-410a-bd08-374116ceef38)
 
 ![예약하기](https://github.com/jaemanc/ktx_gacha/assets/104718153/2e80618f-2bc1-4fbe-af8f-31896383d2bb)
-
+</p>
 ---
 
 
