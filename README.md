@@ -1,5 +1,7 @@
 # ktx_gacha
 
+###  카카오채널 챗봇과 연동한 ktx 예매 매크로 입니다. 
+
 ---
 <p align="center">
 
@@ -19,8 +21,16 @@
 
 
 </p>
+
 ---
-카카오채널 챗봇과 연동한 ktx 예매 매크로 입니다. 
+
+### 로그인
+
+<div style="display: flex; align-items: center;">
+   <img width="20%" alt="image" src="https://github.com/jaemanc/ktx_gacha/assets/104718153/7c24c875-adf2-4d2a-ade8-4828bff03c6b" style="margin-right: 20px;">
+   <p> 카카오 채널 + 챗봇을 통해 멤버십 번호와 비밀번호로 로그인 합니다. </p>
+</div>
+
 
 ---
 
