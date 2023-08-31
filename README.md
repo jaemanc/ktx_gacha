@@ -8,6 +8,18 @@
 <img src= "https://github.com/jaemanc/ktx_gacha/assets/104718153/2e80618f-2bc1-4fbe-af8f-31896383d2bb" align="center" width="32%">
 
 </p>
+
+<p align="center">
+
+<img align="center" width="20%" alt="image" src="https://github.com/jaemanc/ktx_gacha/assets/104718153/a296533a-b2a8-41a9-b78c-cfbaca9066d0">
+<img align="center" width="20%" alt="image" src="https://github.com/jaemanc/ktx_gacha/assets/104718153/e631714a-93f8-4895-a950-82a8ffa46c71">
+<img align="center" width="20%" alt="image" src="https://github.com/jaemanc/ktx_gacha/assets/104718153/b2b7f5ac-6092-4f00-a8e8-fd6735a89904">
+<img align="center" width="20%" alt="image" src="https://github.com/jaemanc/ktx_gacha/assets/104718153/24b739e1-a37e-4b76-ba39-8aeb27f4359e">
+<img align="center" width="15%" alt="image" src="https://github.com/jaemanc/ktx_gacha/assets/104718153/ea662a69-ef50-49fb-911d-59be44aacdc8">
+
+
+</p>
+
 ---
 
 
