@@ -31,6 +31,26 @@
    <p> 카카오 채널 + 챗봇을 통해 멤버십 번호와 비밀번호로 로그인 합니다. </p>
 </div>
 
+<br>
+
+### 조회
+
+<div style="display: flex; align-items: center;">
+   <img width="380" alt="image" src="https://github.com/jaemanc/ktx_gacha/assets/104718153/384c3cc3-a144-4b4d-be4b-e1b23db883ea">
+   <img width="381" alt="image" src="https://github.com/jaemanc/ktx_gacha/assets/104718153/d7fc6425-2bee-4b01-8324-56d5b644efa1">
+   <p> 로그인 이후 조회요청을하고 챗봇 callback 기능을 통해 조회 목록으로 응답합니다. </p>
+</div>
+
+<br>
+
+### 예매
+
+<div style="display: flex; align-items: center;">
+   <img width="376" alt="image" src="https://github.com/jaemanc/ktx_gacha/assets/104718153/bc8c81d0-cc16-4121-9c17-7e71773c2972">
+   <p> 30분 제한으로 표를 반복해서 서치합니다. 예매 가능한 표가 있을 경우 예매요청과 발화자에게 이메일로 예매 사항을 알려줍니다. </p>
+</div>
+
+
 
 ---
 
