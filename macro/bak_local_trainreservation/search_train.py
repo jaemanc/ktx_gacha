@@ -6,7 +6,7 @@ from django.views import View
 from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
-from macro.utils.common import get_web_site_crawling
+from macro.utils.common import get_crawling_driver
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 from datetime import datetime
@@ -76,13 +76,13 @@ def get_train_list(request):
     # 조회 로직 리팩토링
     try:
         train_search_url = "https://www.letskorail.com/index.jsp"
-        train_search = get_web_site_crawling(url=train_search_url)
+        train_search = get_crawling_driver(url=train_search_url)
 
         reservation_btn = train_search.find_element(By.XPATH, '//img[@src="/images/lnb_mu01_01.gif"]')
         reservation_btn.click()
     except Exception as err:
         train_search_url = "https://www.letskorail.com/ebizprd/EbizPrdTicketpr21100W_pr21110.do"
-        train_search = get_web_site_crawling(url=train_search_url)
+        train_search = get_crawling_driver(url=train_search_url)
 
 
     # 승차권 예매 페이지 이동 후 driver 초기화

@@ -16,7 +16,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
-from macro.utils.common import get_web_site_crawling
+from macro.utils.common import get_crawling_driver
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 from datetime import datetime
@@ -151,10 +151,10 @@ def chk_station(target):
 def train_reserve(reservation_model):
     # 최대 30 분 동안 반복해서 서치
     start_time = time.time()
-    end_time = start_time + 30 * 60
+    end_time = start_time + 30 * 60 * 12
 
     # get driver - 목록 조회 페이지에서만 동작해야한다.
-    reserve_driver = get_web_site_crawling()
+    reserve_driver = get_crawling_driver()
 
     url = reserve_driver.current_url
     logger.info(f' current url : {url}')
@@ -175,6 +175,7 @@ def train_reserve(reservation_model):
     logger.info(f" now_time : {now_time}")
 
     flag = False
+
     index = 0
     while time.time() < end_time and not flag:
 
@@ -196,13 +197,13 @@ def train_reserve(reservation_model):
 def page_search_refresh(reservation_model):
     try:
         train_search_url = Pages.KTX_MAIN_PAGE_INDEX
-        train_search = get_web_site_crawling(url=train_search_url)
+        train_search = get_crawling_driver(url=train_search_url)
 
         reservation_btn = train_search.find_element(By.XPATH, Buttons.IMG_SRC_LNB_MU01_01)
         reservation_btn.click()
     except Exception as err:
         train_search_url = Pages.KTX_SEARCH_PAGE
-        train_search = get_web_site_crawling(url=train_search_url)
+        train_search = get_crawling_driver(url=train_search_url)
         # 승차권 예매 페이지 이동 후 driver 초기화
     logger.info(f' 페이지 이동 : {train_search.current_url}')
     train_search.get(train_search.current_url)
@@ -268,7 +269,7 @@ def page_search_refresh(reservation_model):
 
 def reservation_loop(reservation_model, index):
 
-    reserve_driver = get_web_site_crawling()
+    reserve_driver = get_crawling_driver()
 
     # 조회 결과 테이블
 

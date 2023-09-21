@@ -10,7 +10,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
 from macro.utils.buttons import Buttons, Seat
-from macro.utils.common import get_web_site_crawling, use_call_back_msg, \
+from macro.utils.common import get_crawling_driver, use_call_back_msg, \
     train_list_and_callback_chatbot_response_message
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
@@ -114,13 +114,13 @@ def get_train_list_chatbot(request):
     # 조회 로직 리팩토링
     try:
         train_search_url = Pages.KTX_MAIN_PAGE_INDEX
-        train_search = get_web_site_crawling(url=train_search_url)
+        train_search = get_crawling_driver(url=train_search_url)
 
         reservation_btn = train_search.find_element(By.XPATH, Buttons.IMG_SRC_LNB_MU01_01 )
         reservation_btn.click()
     except Exception as err:
         train_search_url = Pages.KTX_SEARCH_PAGE
-        train_search = get_web_site_crawling(url=train_search_url)
+        train_search = get_crawling_driver(url=train_search_url)
 
 
     # 승차권 예매 페이지 이동 후 driver 초기화
