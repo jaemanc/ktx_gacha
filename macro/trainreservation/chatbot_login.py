@@ -8,7 +8,7 @@ from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 from macro.utils.buttons import Buttons
-from macro.utils.common import get_web_site_crawling, use_call_back_msg, login_msg_and_callback_chatbot_response_message
+from macro.utils.common import get_crawling_driver, use_call_back_msg, login_msg_and_callback_chatbot_response_message
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 
@@ -70,10 +70,10 @@ def login(request):
     login_page = None
 
     try:
-        login_page = get_web_site_crawling(url=Pages.KTX_MAIN_PAGE_DO)
+        login_page = get_crawling_driver(url=Pages.KTX_MAIN_PAGE_DO)
         logger.info(f'driver session id: {login_page.session_id}')
     except Exception as err:
-        login_page = get_web_site_crawling(url=Pages.KTX_MAIN_PAGE)
+        login_page = get_crawling_driver(url=Pages.KTX_MAIN_PAGE)
         logger.info(f'retried.. go! {login_page.current_url}, driver session id: {login_page.session_id}')
 
     finally:

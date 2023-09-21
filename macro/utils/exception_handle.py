@@ -3,7 +3,7 @@ import traceback
 
 from selenium import webdriver
 
-from macro.utils.common import get_web_site_crawling
+from macro.utils.common import get_crawling_driver
 import macro.utils.common
 
 logger = logging.getLogger()

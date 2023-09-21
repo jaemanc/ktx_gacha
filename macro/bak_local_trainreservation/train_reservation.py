@@ -7,7 +7,7 @@ from django.views import View
 from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.by import By
 from datetime import datetime, timedelta
-from macro.utils.common import get_web_site_crawling
+from macro.utils.common import get_crawling_driver
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 
@@ -110,7 +110,7 @@ def train_reserve(reservation_model):
     end_time = start_time + 30 * 60
 
     # get driver - 목록 조회 페이지에서만 동작해야한다.
-    reserve_driver = get_web_site_crawling()
+    reserve_driver = get_crawling_driver()
 
     current_time = datetime.now()
 
@@ -141,7 +141,7 @@ def train_reserve(reservation_model):
 
 def reservation_loop(reservation_model, index):
 
-    reserve_driver = get_web_site_crawling()
+    reserve_driver = get_crawling_driver()
     try:
         # 조회 결과 테이블
         table = reserve_driver.find_element(By.ID, "tableResult")

@@ -3,7 +3,7 @@ import traceback
 
 from django.views import View
 from selenium.webdriver.common.by import By
-from macro.utils.common import get_web_site_crawling
+from macro.utils.common import get_crawling_driver
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 
@@ -50,12 +50,12 @@ def login(request):
 
     try:
         login_web_site_url = "https://www.letskorail.com/ebizprd/prdMain.do"
-        login_page = get_web_site_crawling(url=login_web_site_url)
+        login_page = get_crawling_driver(url=login_web_site_url)
 
         logger.info(f'driver session id :  {login_page.session_id}')
     except Exception as err:
         login_web_site_url = "https://www.letskorail.com"
-        login_page = get_web_site_crawling(url=login_web_site_url)
+        login_page = get_crawling_driver(url=login_web_site_url)
 
         logger.info(f' retried.. go! {login_web_site_url}, driver session id :  {login_page.session_id}')
     finally:
