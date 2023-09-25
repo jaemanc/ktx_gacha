@@ -191,7 +191,7 @@ def train_reserve(reservation_model):
             logger.debug(f'{traceback.format_exc()}')
             logger.debug(f'{err}')
 
-    logger.info(f' roop end...')
+    logger.info(f' roop end... , {flag}')
     return flag
 
 def page_search_refresh(reservation_model):
@@ -265,6 +265,11 @@ def page_search_refresh(reservation_model):
         logger.info(f'알림없음 계속 진행. ')
 
     train_search.implicitly_wait(3)
+    reserve_driver = get_crawling_driver()
+    logger.info(f' 대기 팝업 확인... ')
+    WebDriverWait(reserve_driver, 60
+                  ).until_not(EC.presence_of_element_located((By.ID, 'NetFunnel_Loading_Popup')))
+    logger.info(f' 대기 팝업 종료 확인 예약 진행합니다! ')
 
 
 def reservation_loop(reservation_model, index):
@@ -272,7 +277,6 @@ def reservation_loop(reservation_model, index):
     reserve_driver = get_crawling_driver()
 
     # 조회 결과 테이블
-
     table = None
     trs = None
     tr = None
